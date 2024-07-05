@@ -16,4 +16,4 @@ router.route("/create").post(verifyJWT, createCompany);
 router.route("/update/:id").put(verifyJWT, updateCompany);
 router.route("/delete/:id").delete(verifyJWT, deleteCompany);
 
-export { router };
+export default router;
