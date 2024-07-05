@@ -44,14 +44,14 @@ const getLiqcom = async (req, res) => {
 const getallLiquors = async (req, res) => {
   try {
     const liquors = await Liquor.find();
-    if (!liquors) {
+    if (!liquors || liquors.length==0) {
       return res
         .status(404)
         .json({ success: false, message: "no Liquors found" });
     }
     return res
       .status(200)
-      .json({ success: false, message: "Liquors found sucessfully", liquors });
+      .json({ success: true, message: "Liquors found sucessfully", liquors });
   } catch (e) {
     return res
       .status(500)
