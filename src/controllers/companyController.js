@@ -1,7 +1,7 @@
 import { Company } from "../models/companyModel.js";
 
 //create company
-const createCompany = async (req, res) => {
+export const createCompany = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
@@ -33,7 +33,7 @@ const createCompany = async (req, res) => {
   }
 };
 
-const updateCompany = async (req, res) => {
+export const updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -63,7 +63,7 @@ const updateCompany = async (req, res) => {
   }
 };
 
-const deleteCompany = async (req, res) => {
+export const deleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -82,7 +82,7 @@ const deleteCompany = async (req, res) => {
 };
 
 // get the company by id
-const getCompanyById = async (req, res) => {
+export const getCompanyById = async (req, res) => {
   try {
     const { id } = req.params;
     const company = await Company.findById(id);
@@ -102,21 +102,21 @@ const getCompanyById = async (req, res) => {
 };
 
 // get all company
-const getAllCompany = async (req, res) => {
+export const getAllCompany = async (req, res) => {
   try {
     const company = await Company.find();
     if (!company || company.length == 0) {
       return res
         .status(404)
         .json({ success: false, message: "no company data found" });
-    }
+    }         
     return res.status(200).json({
       success: true,
       message: "Company data fetched successfully",
       company,
     });
   } catch (e) {
-    return res
+    return res 
       .status(500)
       .json({ success: false, message: "Failed to fetch company data" });
   }
