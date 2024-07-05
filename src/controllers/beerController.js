@@ -114,3 +114,24 @@ export const getAllBeer = async (req, res) => {
       .json({ success: false, message: "Failed to fetch Beer data" });
   }
 };
+
+
+//get beer by company
+export const getBeerByCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const beer = await Beer.find({company:companyId});
+    if (!beer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Beer not found" });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Beer found successfully", beer });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get the Beer" });
+  }
+};
