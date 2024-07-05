@@ -32,7 +32,7 @@ const getallBills = async (req, res) => {
     }
     return res
       .status(200)
-      .json({ success: false, message: "Bills found sucessfully", bills });
+      .json({ success: true, message: "Bills found sucessfully", bills });
   } catch (e) {
     return res
       .status(500)
