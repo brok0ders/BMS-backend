@@ -1,4 +1,4 @@
-import { Beer } from "../models/beerModel";
+import { Beer } from "../models/beerModel.js";
 
 //create Beer
 const createBeer = async (req, res) => {

@@ -1,10 +1,9 @@
-import { User } from "../models/userModel";
+import { User } from "../models/userModel.js";
 
 // get the user by id
 const getUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await User.findById(id);
+    const user = await User.findById(req?.user?._id).select("-password");
     if (!user) {
       return res.status(404).json({ success: false, message: "no user found" });
     }
@@ -21,7 +20,7 @@ const getUser = async (req, res) => {
 // get all users
 const getallUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     if (!users) {
       return res
         .status(404)
@@ -40,7 +39,7 @@ const getallUsers = async (req, res) => {
 // create the new user [Register]
 const createUser = async (req, res) => {
   try {
-    const { name, email, username, password } = req.body;
+    const { name, username, password } = req.body;
     if (!name || !username || !password) {
       return res.status(404).json({
         success: false,
@@ -48,28 +47,28 @@ const createUser = async (req, res) => {
       });
     }
 
-    const existingUser = await User.find({
-      name: name,
+    const existingUser = await User.findOne({
       username: username,
-      password: password,
     });
     if (existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "user already exists" });
+        .json({ success: false, message: "user already exists", existingUser });
     }
-    const user = await User.create({ name, username, password });
+    const user = await User.create(req.body);
+    const token = await user.generateAccessToken();
     return res
       .status(201)
-      .json({ success: true, message: "new user created successfully!", user });
+      .json({ success: true, message: "new user created successfully!", user, token: token });
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to create the user" });
+      .json({ success: false, message: "Failed to create the user", error: e });
   }
 };
 
-// create the new user [Register]
+// login the existing user [Login]
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -80,17 +79,28 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const existingUser = await User.find({
+    let existingUser = await User.findOne({
       username: username,
-      password: password,
     });
-    if (existingUser) {
-        return res
-        .status(201)
-        .json({ success: true, message: "user logined successfully!", existingUser});
+    if (!existingUser) {
+      return res
+      .status(404)
+      .json({ success: false, message: "no user found with the given email."});
     }
+    const isCorrect = await existingUser.isPasswordCorrect(password);
+    if (!isCorrect) {
+      return res
+      .status(401)
+      .json({ success: false, message: "wrong password", existingUser});
+
+    }
+    const token = await existingUser.generateAccessToken();
+    return res
+    .status(201)
+    .json({ success: true, message: "user logined successfully!", user: existingUser, token: token});
     
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
       .json({ success: false, message: "Failed to login the user" });
@@ -101,7 +111,7 @@ const loginUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, email, username, password } = req.body;
-    if (!name && !username && !password) {
+    if (!name && !username && !password && !email) {
       return res.status(404).json({
         success: false,
         message: "at least one field is required for updating the user details",
@@ -111,7 +121,7 @@ const updateUser = async (req, res) => {
       req?.user?._id,
       { $set: req.body },
       { new: true }
-    );
+    ).select("-password");
 
     if (!user) {
       return res
@@ -133,7 +143,7 @@ const updateUser = async (req, res) => {
 // delete the user
 const deleteUser = async (req, res) => {
   try {
-    const existingUser = await User.findById(req?.user?._id);
+    const existingUser = await User.findById(req?.user?._id).select("-password");
     if (!existingUser) {
       return res
         .status(400)

@@ -15,11 +15,11 @@ const billSchema = new Schema(
     products: [
       {
         brand: {
-          type: mongoose.Types.ObjectId,
+          type: String,
           require: true,
         },
         quantity: {
-          type: mongoose.Types.ObjectId,
+          type: String,
           require: true,
         },
       },
