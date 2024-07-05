@@ -1,17 +1,17 @@
 import { Customer } from "../models/customerModel.js";
 
 //create Customer
-const createCustomer = async (req, res) => {
+export const createCustomer = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
+    const { licensee, shop, firm } = req.body;
+    if (!licensee || !shop || !firm) {
       return res.status(400).json({
         success: false,
         message: "input data is insufficient for creating the Customer",
       });
     }
-    const existingCustomer = await Customer.find({
-      name: name,
+    const existingCustomer = await Customer.findOne({
+      licensee: licensee,
     });
     if (existingCustomer) {
       return res
@@ -19,7 +19,9 @@ const createCustomer = async (req, res) => {
         .json({ success: false, message: "Customer already exist" });
     }
     const customer = await Customer.create({
-      name: name,
+      licensee: licensee,
+      shop,
+      firm,
     });
     return res.status(201).json({
       success: true,
@@ -33,11 +35,11 @@ const createCustomer = async (req, res) => {
   }
 };
 
-const updateCustomer = async (req, res) => {
+export const updateCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
-    if (!name) {
+    const { licensee, shop, firm } = req.body;
+    if (!licensee || !shop || !firm) {
       return res.status(400).json({
         success: false,
         message: "Insufficient data for updating the value",
@@ -50,7 +52,7 @@ const updateCustomer = async (req, res) => {
     }
     const updatedCustomer = await Customer.findByIdAndUpdate(
       id,
-      { $set: { name } },
+      { $set: { licensee, shop, firm } },
       { new: true }
     );
     return res.status(200).json({
@@ -64,7 +66,7 @@ const updateCustomer = async (req, res) => {
   }
 };
 
-const deleteCustomer = async (req, res) => {
+export const deleteCustomer = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -76,7 +78,10 @@ const deleteCustomer = async (req, res) => {
     const Customer = await Customer.findByIdAndDelete(id);
     return res
       .status(200)
-      .json({ success: true, message: "Customer name deleted successfully" });
+      .json({
+        success: true,
+        message: "Customer licensee deleted successfully",
+      });
   } catch (e) {
     return res
       .status(500)
@@ -85,7 +90,7 @@ const deleteCustomer = async (req, res) => {
 };
 
 // get the Customer by id
-const getCustomerById = async (req, res) => {
+export const getCustomerById = async (req, res) => {
   try {
     const { id } = req.params;
     const customer = await Customer.findById(id);
@@ -107,7 +112,7 @@ const getCustomerById = async (req, res) => {
 };
 
 // get all Customer
-const getAllCustomer = async (req, res) => {
+export const getAllCustomer = async (req, res) => {
   try {
     const customer = await Customer.find();
     if (!customer || customer.length == 0) {

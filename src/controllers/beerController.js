@@ -1,16 +1,17 @@
 import { Beer } from "../models/beerModel.js";
 
+
 //create Beer
-const createBeer = async (req, res) => {
+export const createBeer = async (req, res) => {
   try {
     const { brandName, stock, price, company } = req.body;
-    if (!brandName || !stock || !price || !company) {
+    if (!brandName || !stock || !price || !company ) {
       return res.status(400).json({
         success: false,
         message: "input data is insufficient for creating the Beer",
       });
     }
-    const existingBeer = await Beer.find(req.body);
+    const existingBeer = await Beer.findOne({brandName});
     if (existingBeer) {
       return res
         .status(400)
@@ -23,13 +24,14 @@ const createBeer = async (req, res) => {
       beer,
     });
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
       .json({ success: false, message: "Failed to create Beer" });
   }
 };
 
-const updateBeer = async (req, res) => {
+export const updateBeer = async (req, res) => {
   try {
     const {id} =req.params;
     const { brandName, stock, price, company } = req.body;
@@ -54,18 +56,18 @@ const updateBeer = async (req, res) => {
   }
 };
 
-const deleteBeer = async (req, res) => {
+export const deleteBeer = async (req, res) => {
   try {
     const { id } = req.params;
     const existingBeer=await Beer.findById(id);
     if(!existingBeer){
         return res.status(404).json({success:false,message:"Beer not found"})
     }
-    const beer = await Beer.findByIdAndDelete(id);
+    await Beer.findByIdAndDelete(id);
     return res
       .status(200)
-      .json({ success: true, message: "Beer deleted successfully" ,beer});
-  } catch (e) {
+      .json({ success: true, message: "Beer deleted successfully" });
+  } catch (e) { 
     return res
       .status(500)
       .json({ success: false, message: "Failed to get the comapany" });
@@ -73,7 +75,7 @@ const deleteBeer = async (req, res) => {
 };
 
 // get the Beer by id
-const getBeerById = async (req, res) => {
+export const getBeerById = async (req, res) => {
   try {
     const { id } = req.params;
     const beer = await Beer.findById(id);
@@ -93,7 +95,7 @@ const getBeerById = async (req, res) => {
 };
 
 // get all Beer
-const getAllBeer = async (req, res) => {
+export const getAllBeer = async (req, res) => {
   try {
     const beer = await Beer.find();
     if (!beer || beer.length == 0) {

@@ -10,6 +10,6 @@ router.route("/:id").get(verifyJWT, getLiquor);
 router.route("/:com").get(verifyJWT, getLiqcom);
 router.route("/new").post(verifyJWT, createLiquor);
 router.route("/edit").put(verifyJWT, updateLiquor);
-router.route("/delete").get(verifyJWT, deleteLiquor);
+router.route("/delete").delete(verifyJWT, deleteLiquor);
 
 export default router;

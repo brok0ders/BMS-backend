@@ -2,10 +2,18 @@ import mongoose, { Schema } from "mongoose";
 
 const customerSchema = new Schema(
   {
-    name: {
+    licensee: {
       type: String,
       required: true,
     },
+    shop:{
+      type: String,
+      required: true,
+    },
+    firm:{
+      type: String,
+      required: true,
+    }
   },
   { timestamps: true }
 );

@@ -10,7 +10,7 @@ export const createCompany = async (req, res) => {
         message: "input data is insufficient for creating the company",
       });
     }
-    const existingCompany = await Company.find({
+    const existingCompany = await Company.findOne({
       name: name,
     });
     if (existingCompany) {
