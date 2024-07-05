@@ -9,6 +9,6 @@ router.route("/all").get(verifyJWT, getallBills);
 router.route("/:id").get(verifyJWT, getBill);
 router.route("/new").post(verifyJWT, createBill);
 router.route("/edit").put(verifyJWT, updateBill);
-router.route("/delete").get(verifyJWT, deleteBill);
+router.route("/delete").delete(verifyJWT, deleteBill);
 
-export {router};
+export default router;
