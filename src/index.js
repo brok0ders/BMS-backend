@@ -1,7 +1,6 @@
 import app from "./app.js";
 
 import dotenv from "dotenv";
-import cloudinary from "cloudinary";
 import express from "express";
 import connectDB from "./db/db.js";
 dotenv.config();

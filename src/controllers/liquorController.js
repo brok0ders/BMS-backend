@@ -1,4 +1,4 @@
-import { Liquor } from "../models/liquorModel";
+import { Liquor } from "../models/liquorModel.js";
 
 // get the Liquor by id
 const getLiquor = async (req, res) => {
@@ -20,8 +20,28 @@ const getLiquor = async (req, res) => {
   }
 };
 
+// get the Liquor by company name
+const getLiqcom = async (req, res) => {
+  try {
+    const { com } = req.params;
+    const liquor = await Liquor.find({company: com});
+    if (!liquor) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no Liquor found on the given company name"});
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Liquor found successfully of the given company", liquor });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get the Liquor by company name" });
+  }
+};
+
 // get all Liquors
-const getallLiquor = async (req, res) => {
+const getallLiquors = async (req, res) => {
   try {
     const liquors = await Liquor.find();
     if (!liquors) {
@@ -127,4 +147,4 @@ const deleteLiquor = async (req, res) => {
   }
 };
 
-export { getLiquor, getallLiquor, createLiquor, updateLiquor, deleteLiquor };
+export { getLiquor, getallLiquors, getLiqcom, createLiquor, updateLiquor, deleteLiquor };

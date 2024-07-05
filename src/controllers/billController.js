@@ -1,4 +1,4 @@
-import { Bill } from "../models/billModel";
+import { Bill } from "../models/billModel.js";
 
 
 // get the Bill by id
@@ -25,7 +25,7 @@ const getBill = async (req, res) => {
 const getallBills = async (req, res) => {
   try {
     const bills = await Bill.find();
-    if (!bills) {
+    if (!bills || bills.length==0) {
       return res
         .status(404)
         .json({ success: false, message: "no Bills found" });
@@ -128,4 +128,4 @@ const deleteBill = async (req, res) => {
   }
 };
 
-export { getBill, getallBill, createBill, updateBill, deleteBill };
+export { getBill, getallBills, createBill, updateBill, deleteBill };

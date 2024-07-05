@@ -1,4 +1,4 @@
-import { Company } from "../models/companyModel";
+import { Company } from "../models/companyModel.js";
 
 //create company
 export const createCompany = async (req, res) => {
