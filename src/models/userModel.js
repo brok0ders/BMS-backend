@@ -1,0 +1,65 @@
+import mongoose, { Schema } from "mongoose";
+
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      require: true,
+    },
+    email: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    username: {
+      type: String,
+      require: true,
+      unique: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      require: true,
+    },
+    role: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+    }
+  },
+  { timestamps: true }
+);
+
+// Pre hooks for password Hashing
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+// Method to check the Password
+
+userSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+// AccessTOken
+
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      name: this.name,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
+    }
+  );
+};
+
+export const User = mongoose.model("User", userSchema);
+
