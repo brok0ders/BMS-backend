@@ -48,7 +48,7 @@ export const updateBeer = async (req, res) => {
     );
     return res
       .status(200)
-      .json({ success: true, message: "Beer details updated successfully" });
+      .json({ success: true, message: "Beer details updated successfully", beer: updatedBeer });
   } catch (e) {
     return res
       .status(500)
@@ -66,7 +66,7 @@ export const deleteBeer = async (req, res) => {
     await Beer.findByIdAndDelete(id);
     return res
       .status(200)
-      .json({ success: true, message: "Beer deleted successfully" });
+      .json({ success: true, message: "Beer deleted successfully", beer: existingBeer });
   } catch (e) { 
     return res
       .status(500)

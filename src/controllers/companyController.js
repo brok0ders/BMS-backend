@@ -55,7 +55,11 @@ export const updateCompany = async (req, res) => {
     );
     return res
       .status(200)
-      .json({ success: true, message: "Company details updated successfully" });
+      .json({
+        success: true,
+        message: "Company details updated successfully",
+        company: updateCompany,
+      });
   } catch (e) {
     return res
       .status(500)
@@ -66,14 +70,20 @@ export const updateCompany = async (req, res) => {
 export const deleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       return res
         .status(400)
         .json({ success: false, message: "Insufficient data" });
     }
-    const company=await Company.findByIdAndDelete(id)
-    return res.status(200).json({success:true,message:"Company name deleted successfully"})
+    const company = await Company.findByIdAndDelete(id);
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Company name deleted successfully",
+        company: company,
+      });
   } catch (e) {
     return res
       .status(500)
@@ -109,14 +119,14 @@ export const getAllCompany = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "no company data found" });
-    }         
+    }
     return res.status(200).json({
       success: true,
       message: "Company data fetched successfully",
       company,
     });
   } catch (e) {
-    return res 
+    return res
       .status(500)
       .json({ success: false, message: "Failed to fetch company data" });
   }

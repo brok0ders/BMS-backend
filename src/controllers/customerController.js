@@ -58,6 +58,7 @@ export const updateCustomer = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Customer details updated successfully",
+      customer: updateCustomer,
     });
   } catch (e) {
     return res
@@ -75,13 +76,12 @@ export const deleteCustomer = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Insufficient data" });
     }
-    const Customer = await Customer.findByIdAndDelete(id);
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Customer licensee deleted successfully",
-      });
+    const customer = await Customer.findByIdAndDelete(id);
+    return res.status(200).json({
+      success: true,
+      message: "Customer licensee deleted successfully",
+      customer,
+    });
   } catch (e) {
     return res
       .status(500)
