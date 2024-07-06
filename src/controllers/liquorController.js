@@ -25,7 +25,7 @@ const getLiqcom = async (req, res) => {
   try {
     const { com } = req.params;
     const liquor = await Liquor.find({company: com});
-    if (!liquor) {
+    if (!liquor || liquor.length==0) {
       return res
         .status(404)
         .json({ success: false, message: "no Liquor found on the given company name"});
@@ -70,7 +70,7 @@ const createLiquor = async (req, res) => {
       });
     }
 
-    const existingLiquor = await Liquor.find(req.body);
+    const existingLiquor = await Liquor.findOne({brandName});
     if (existingLiquor) {
       return res
         .status(400)
@@ -85,6 +85,7 @@ const createLiquor = async (req, res) => {
         liquor,
       });
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
       .json({ success: false, message: "Failed to create the Liquor" });

@@ -50,13 +50,6 @@ const createBill = async (req, res) => {
         message: "input data is insufficient for creating the Bill",
       });
     }
-
-    const existingBill = await Bill.find(req.body);
-    if (existingBill) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Bill already exists" });
-    }
     const bill = await Bill.create(req.body);
     return res
       .status(201)

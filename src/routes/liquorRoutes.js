@@ -7,9 +7,9 @@ const router = Router();
 
 router.route("/all").get(verifyJWT, getallLiquors);
 router.route("/:id").get(verifyJWT, getLiquor);
-router.route("/:com").get(verifyJWT, getLiqcom);
+router.route("/company/:com").get(verifyJWT, getLiqcom);
 router.route("/new").post(verifyJWT, createLiquor);
-router.route("/edit").put(verifyJWT, updateLiquor);
-router.route("/delete").delete(verifyJWT, deleteLiquor);
+router.route("/edit/:id").put(verifyJWT, updateLiquor);
+router.route("/delete/:id").delete(verifyJWT, deleteLiquor);
 
 export default router;
