@@ -13,6 +13,10 @@ const customerSchema = new Schema(
     firm:{
       type: String,
       required: true,
+    },
+    pan:{
+      type:String,
+      required: true
     }
   },
   { timestamps: true }
