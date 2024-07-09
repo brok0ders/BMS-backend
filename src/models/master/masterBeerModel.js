@@ -22,6 +22,6 @@ const BeerSchema = new Schema({
       price: { type: Number, required: true },
     },
   ],
-});
+}); 
 
-export const MasterLiquor = mongoose.model("MasterBeer", BeerSchema);
+export const MasterBeer = mongoose.model("MasterBeer", BeerSchema);
