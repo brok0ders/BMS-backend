@@ -39,8 +39,30 @@ const getallUsers = async (req, res) => {
 // create the new user [Register]
 const createUser = async (req, res) => {
   try {
-    const { name, username, password } = req.body;
-    if (!name || !username || !password) {
+    const {
+      name,
+      username,
+      email,
+      mobile,
+      password,
+      addressGodown,
+      FLliscensee,
+      address,
+      TINno,
+      PANno,
+    } = req.body;
+    if (
+      !name ||
+      !username ||
+      !password ||
+      !email ||
+      !mobile ||
+      !addressGodown ||
+      !FLliscensee ||
+      !address ||
+      !TINno ||
+      !PANno
+    ) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the user",
@@ -53,13 +75,28 @@ const createUser = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "user already exists", existingUser });
+        .json({ success: false, message: "user already exists" });
     }
-    const user = await User.create(req.body);
+    const user = await User.create({
+      name,
+      username,
+      email: [email],
+      mobile,
+      password,
+      addressGodown,
+      FLliscensee,
+      address,
+      TINno,
+      PANno,
+    });
     const token = await user.generateAccessToken();
-    return res
-      .status(201)
-      .json({ success: true, message: "new user created successfully!", user, token: token });
+
+    return res.status(201).json({
+      success: true,
+      message: "new user created successfully!",
+      user,
+      token: `Bearer ${token}`,
+    });
   } catch (e) {
     console.log(e);
     return res
@@ -83,22 +120,24 @@ const loginUser = async (req, res) => {
       username: username,
     });
     if (!existingUser) {
-      return res
-      .status(404)
-      .json({ success: false, message: "no user found with the given email."});
+      return res.status(404).json({
+        success: false,
+        message: "no user found with the given email.",
+      });
     }
     const isCorrect = await existingUser.isPasswordCorrect(password);
     if (!isCorrect) {
       return res
-      .status(401)
-      .json({ success: false, message: "wrong password", existingUser});
-
+        .status(401)
+        .json({ success: false, message: "wrong user/password", existingUser });
     }
     const token = await existingUser.generateAccessToken();
-    return res
-    .status(201)
-    .json({ success: true, message: "user logined successfully!", user: existingUser, token: token});
-    
+    return res.status(201).json({
+      success: true,
+      message: "user logined successfully!",
+      user: existingUser,
+      token: `Bearer ${token}`,
+    });
   } catch (e) {
     console.log(e);
     return res
@@ -110,8 +149,8 @@ const loginUser = async (req, res) => {
 // update the user
 const updateUser = async (req, res) => {
   try {
-    const { name, email, username, password } = req.body;
-    if (!name && !username && !password && !email) {
+    const { email, password } = req.body;
+    if (!password && !email) {
       return res.status(404).json({
         success: false,
         message: "at least one field is required for updating the user details",
@@ -119,7 +158,49 @@ const updateUser = async (req, res) => {
     }
     const user = await User.findByIdAndUpdate(
       req?.user?._id,
-      { $set: req.body },
+      {
+        $set: {
+          password: password,
+        },
+        $push: {
+          email: email,
+        },
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no such user found" });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "user details updates successfully!",
+      user,
+    });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to update the user details" });
+  }
+};
+
+// update the user
+const deleteEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(404).json({
+        success: false,
+        message: "email is required for adding the email",
+      });
+    }
+    const user = await User.findByIdAndUpdate(
+      req?.user?._id,
+      {
+        $pull: { email: email },
+      },
       { new: true }
     ).select("-password");
 
@@ -143,7 +224,9 @@ const updateUser = async (req, res) => {
 // delete the user
 const deleteUser = async (req, res) => {
   try {
-    const existingUser = await User.findById(req?.user?._id).select("-password");
+    const existingUser = await User.findById(req?.user?._id).select(
+      "-password"
+    );
     if (!existingUser) {
       return res
         .status(400)
@@ -160,4 +243,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export { getUser, getallUsers, createUser, updateUser, deleteUser, loginUser };
+export { getUser, getallUsers, createUser, updateUser, deleteUser, loginUser, deleteEmail };

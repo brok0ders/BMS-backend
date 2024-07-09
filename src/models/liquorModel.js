@@ -21,6 +21,11 @@ const liquorSchema = new Schema(
       ref: "Company",
       require: true,
     },
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      require: true,
+    }
   },
   { timestamps: true }
 );

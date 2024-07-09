@@ -7,13 +7,20 @@ const userSchema = new Schema(
       type: String,
       require: true,
     },
-    email: {
+    email: [{
       type: String,
       unique: true,
       trim: true,
       lowercase: true,
-    },
+      require: true,
+    }],
     username: {
+      type: String,
+      require: true,
+      unique: true,
+      trim: true,
+    },
+    mobile: {
       type: String,
       require: true,
       unique: true,
@@ -22,6 +29,30 @@ const userSchema = new Schema(
     password: {
       type: String,
       require: true,
+    },
+    addressGodown: {
+      type: String,
+      require: true,
+    },
+    FLliscensee: {
+      type: String,
+      rquire: true,
+    },
+    address: {
+      type: String,
+      require: true,
+    },
+    TINno: {
+      type: String,
+      require: true,
+      unique: true,
+      trim: true,
+    },
+    PANno: {
+      type: String,
+      require: true,
+      unique: true,
+      trim: true,
     },
     role: {
       type: String,

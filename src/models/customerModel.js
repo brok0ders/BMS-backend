@@ -13,6 +13,11 @@ const customerSchema = new Schema(
     firm:{
       type: String,
       required: true,
+    },
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      require: true,
     }
   },
   { timestamps: true }

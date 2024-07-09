@@ -25,10 +25,10 @@ const getLiqcom = async (req, res) => {
   try {
     const { com } = req.params;
     const liquor = await Liquor.find({company: com});
-    if (!liquor || liquor.length==0) {
+    if (!liquor) {
       return res
         .status(404)
-        .json({ success: false, message: "no Liquor found on the given company name"});
+        .json({ success: false, message: "no Liquor found on the given company"});
     }
     return res
       .status(200)
@@ -36,7 +36,7 @@ const getLiqcom = async (req, res) => {
   } catch (e) {
     return res
       .status(500)
-      .json({ success: false, message: "Failed to get the Liquor by company name" });
+      .json({ success: false, message: "Failed to get the Liquor by company" });
   }
 };
 
