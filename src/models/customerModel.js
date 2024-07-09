@@ -17,6 +17,11 @@ const customerSchema = new Schema(
     pan:{
       type:String,
       required: true
+    },
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      require: true,
     }
   },
   { timestamps: true }

@@ -3,8 +3,8 @@ import { Company } from "../models/companyModel.js";
 //create company
 export const createCompany = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
+    const { name, companyType } = req.body;
+    if (!name || !companyType) {
       return res.status(400).json({
         success: false,
         message: "input data is insufficient for creating the company",
@@ -20,6 +20,8 @@ export const createCompany = async (req, res) => {
     }
     const company = await Company.create({
       name: name,
+      companyType: companyType,
+      user: req?.user?._id
     });
     return res.status(201).json({
       success: true,
@@ -36,8 +38,8 @@ export const createCompany = async (req, res) => {
 export const updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
-    if (!name) {
+    const { name, companyType } = req.body;
+    if (!name && !companyType) {
       return res.status(400).json({
         success: false,
         message: "Insufficient data for updating the value",
@@ -50,7 +52,7 @@ export const updateCompany = async (req, res) => {
     }
     const updatedCompany = await Company.findByIdAndUpdate(
       id,
-      { $set: { name } },
+      { $set: req.body },
       { new: true }
     );
     return res
@@ -70,7 +72,7 @@ export const updateCompany = async (req, res) => {
 export const deleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
-
+    console.log(id);
     if (!id) {
       return res
         .status(400)
@@ -114,10 +116,10 @@ export const getCompanyById = async (req, res) => {
 // get all company
 export const getAllCompany = async (req, res) => {
   try {
-    const company = await Company.find();
+    const company = await Company.find({user: req?.user?._id});
     if (!company || company.length == 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ success: false, message: "no company data found" });
     }
     return res.status(200).json({

@@ -4,7 +4,9 @@ import { Bill } from "../models/billModel.js";
 const getBill = async (req, res) => {
   try {
     const { id } = req.params;
-    const bill = await Bill.findById(id);
+    const bill = await Bill.findById(id)
+      .populate("seller")
+      .populate("customer");
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
@@ -21,7 +23,11 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
-    const bills = await Bill.find();
+    const { sellerId } = req.params;
+    const bills = await Bill.find({ seller: sellerId })
+      .populate("seller")
+      .populate("customer")
+      .populate("company");
     if (!bills || bills.length == 0) {
       return res
         .status(404)
@@ -47,7 +53,9 @@ const createBill = async (req, res) => {
         message: "input data is insufficient for creating the Bill",
       });
     }
-    const bill = await Bill.create(req.body);
+    const bill = await Bill.create(req.body)
+      .populate("seller")
+      .populate("customer");
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",
@@ -76,7 +84,9 @@ const updateBill = async (req, res) => {
       id,
       { $set: req.body },
       { new: true }
-    );
+    )
+      .populate("seller")
+      .populate("customer");
 
     if (!bill) {
       return res
@@ -105,7 +115,9 @@ const deleteBill = async (req, res) => {
         .status(400)
         .json({ success: false, message: "no Bill found!" });
     }
-    const bill = await Bill.findByIdAndDelete(id);
+    const bill = await Bill.findByIdAndDelete(id)
+      .populate("seller")
+      .populate("customer");
     return res
       .status(200)
       .json({ success: true, message: "Bill deleted successfully!", bill });

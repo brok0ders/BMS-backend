@@ -6,6 +6,15 @@ const companySchema = new Schema(
       type: String,
       require: true,
     },
+    companyType: {
+      type: String,
+      enum: ["beer", "liquor"]
+    },
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      require: true,
+    }
   },
   { timestamps: true }
 );
