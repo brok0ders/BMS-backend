@@ -25,6 +25,15 @@ const billSchema = new Schema(
       type: mongoose.Types.ObjectId,
       ref: "Company",
     },
+    excise: {
+      type: String,
+      require: true,
+    },
+    pno: {
+      type: String,
+      require: true,
+    },
+    
     total: {
       type: Number,
       require: true,

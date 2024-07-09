@@ -14,6 +14,10 @@ const customerSchema = new Schema(
       type: String,
       required: true,
     },
+    pan:{
+      type:String,
+      required: true
+    },
     user: {
       type: mongoose.Types.ObjectId,
       ref: "User",
