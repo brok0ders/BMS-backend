@@ -27,7 +27,7 @@ const getLiqcom = async (req, res) => {
     const liquor = await Liquor.find({company: com});
     if (!liquor) {
       return res
-        .status(404)
+        .status(200)
         .json({ success: false, message: "no Liquor found on the given company"});
     }
     return res

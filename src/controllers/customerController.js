@@ -3,8 +3,8 @@ import { Customer } from "../models/customerModel.js";
 //create Customer
 export const createCustomer = async (req, res) => {
   try {
-    const { licensee, shop, firm } = req.body;
-    if (!licensee || !shop || !firm) {
+    const { licensee, shop, firm, pan } = req.body;
+    if (!licensee || !shop || !firm || !pan) {
       return res.status(400).json({
         success: false,
         message: "input data is insufficient for creating the Customer",
@@ -19,9 +19,11 @@ export const createCustomer = async (req, res) => {
         .json({ success: false, message: "Customer already exist" });
     }
     const customer = await Customer.create({
-      licensee: licensee,
+      licensee,
       shop,
       firm,
+      pan,
+      user: req.user,
     });
     return res.status(201).json({
       success: true,
@@ -29,6 +31,7 @@ export const createCustomer = async (req, res) => {
       customer,
     });
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
       .json({ success: false, message: "Failed to create Customer" });
