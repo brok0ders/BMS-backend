@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-router.route("/all").get(verifyJWT, getAllCompany);
+router.route("/all").get(getAllCompany);
 router.route("/:id").get(verifyJWT, getCompanyById);
 router.route("/create").post(verifyJWT, createCompany);
 router.route("/update/:id").put(verifyJWT, updateCompany);

@@ -21,7 +21,7 @@ export const createCompany = async (req, res) => {
     const company = await Company.create({
       name: name,
       companyType: companyType,
-      user: req?.user?._id
+      user: req?.user?._id,
     });
     return res.status(201).json({
       success: true,
@@ -55,13 +55,11 @@ export const updateCompany = async (req, res) => {
       { $set: req.body },
       { new: true }
     );
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Company details updated successfully",
-        company: updateCompany,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Company details updated successfully",
+      company: updateCompany,
+    });
   } catch (e) {
     return res
       .status(500)
@@ -79,13 +77,11 @@ export const deleteCompany = async (req, res) => {
         .json({ success: false, message: "Insufficient data" });
     }
     const company = await Company.findByIdAndDelete(id);
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Company name deleted successfully",
-        company: company,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Company name deleted successfully",
+      company: company,
+    });
   } catch (e) {
     return res
       .status(500)
@@ -97,7 +93,7 @@ export const deleteCompany = async (req, res) => {
 export const getCompanyById = async (req, res) => {
   try {
     const { id } = req.params;
-    const company = await Company.findById(id);
+    const company = await Company.findById(id).populate("company");
     if (!company) {
       return res
         .status(404)
@@ -116,20 +112,63 @@ export const getCompanyById = async (req, res) => {
 // get all company
 export const getAllCompany = async (req, res) => {
   try {
-    const company = await Company.find({user: req?.user?._id});
-    if (!company || company.length == 0) {
-      return res
-        .status(200)
-        .json({ success: false, message: "no company data found" });
+    const { keyword } = req.query;
+    let company;
+
+    console.log(`Search keyword: ${keyword}`);
+
+    if (keyword) {
+      company = await Company.aggregate([
+        {
+          $lookup: {
+            from: "mastercompanies",
+            localField: "company",
+            foreignField: "_id",
+            as: "masterCompany",
+          },
+        },
+        {
+          $unwind: "$masterCompany",
+        },
+        {
+          $match: {
+            $or: [
+              { "masterCompany.name": { $regex: keyword, $options: "i" } },
+              {
+                "masterCompany.companyType": { $regex: keyword, $options: "i" },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            "masterCompany.name": 1,
+            "masterCompany.companyType": 1,
+          },
+        },
+      ]);
+    } else {
+      company = await Company.find({ user: req.user?._id }).populate("company");
     }
+
+    if (!company || company.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "No company data found",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Company data fetched successfully",
       company,
     });
   } catch (e) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch company data" });
+    console.error("Error fetching company data:", e);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch company data",
+    });
   }
 };
