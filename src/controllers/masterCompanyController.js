@@ -2,7 +2,7 @@ import { MasterCompany } from "../models/master/masterCompanyModel.js";
 
 export const getAllMasterCompanies = async (req, res) => {
   try {
-    const companies = await MasterCompany.find();
+    const companies = await MasterCompany.find().sort({ companyType: -1 });
     if (companies.length == 0) {
       return res
         .status(404)
@@ -20,7 +20,6 @@ export const getAllMasterCompanies = async (req, res) => {
 export const insertManyCompanies = async (req, res) => {
   try {
     await MasterCompany.insertMany(req.body);
-
     return res
       .status(201)
       .json({ success: true, message: "Companies successfully inserted" });

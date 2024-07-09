@@ -2,19 +2,16 @@ import mongoose, { Schema } from "mongoose";
 
 const companySchema = new Schema(
   {
-    name: {
-      type: String,
+    company: {
+      type: mongoose.Types.ObjectId,
+      ref: "MasterCompany",
       require: true,
-    },
-    companyType: {
-      type: String,
-      enum: ["beer", "liquor"]
     },
     user: {
       type: mongoose.Types.ObjectId,
       ref: "User",
       require: true,
-    }
+    },
   },
   { timestamps: true }
 );

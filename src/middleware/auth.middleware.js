@@ -4,30 +4,28 @@ import { User } from "../models/userModel.js";
 export const verifyJWT = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    
+
     const token = authHeader?.split(" ")[1];
     if (!token) {
-      return;
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized request" });
     }
-    
+
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    
-    const user = await User.findById(decodedToken?._id).select(
-      "-password"
-    );
-    
+
+    const user = await User.findById(decodedToken?._id).select("-password");
+
     if (!user) {
       return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized request" });
+        .status(401)
+        .json({ success: false, message: "Unauthorized request" });
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized request" });
+    res.status(401).json({ success: false, message: "Unauthorized request" });
   }
 };
 
