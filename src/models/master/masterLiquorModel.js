@@ -10,7 +10,7 @@ const LiquorSchema = new Schema({
   },
   sizes: [
     {
-      size: { type: Number, required: true },
+      size: { type: String, required: true },
       price: { type: Number, required: true },
       wep: { type: Number, required: true }, //Women Empowerment Cow Protection Sports Activity Cess
       hologram: { type: Number, required: true }, //Hologram & track and trace fee
