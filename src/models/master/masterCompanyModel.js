@@ -4,4 +4,4 @@ const SupplierSchema = new Schema({
   companyType: { type: String, required: true },
 });
 
-const MasterCompany = mongoose.model("MasterCompany", SupplierSchema);
+export const MasterCompany = mongoose.model("MasterCompany", SupplierSchema);

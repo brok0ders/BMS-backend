@@ -5,7 +5,8 @@ import billRoutes from "./routes/billRoutes.js";
 import liquorRoutes from "./routes/liquorRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import beerRoutes from "./routes/beerRoutes.js";
-import customerRoutes from "./routes/customerRoutes.js"
+import customerRoutes from "./routes/customerRoutes.js";
+import masterCompanyRoutes from "./routes/masterCompanyRoutes.js";
 const app = express();
 
 app.use(
@@ -23,5 +24,6 @@ app.use("/api/v1/liquor", liquorRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/beer", beerRoutes);
 app.use("/api/v1/customer", customerRoutes);
+app.use("/api/v1/master-company", masterCompanyRoutes);
 
 export default app;

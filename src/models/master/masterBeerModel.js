@@ -13,7 +13,7 @@ const BeerSchema = new Schema({
   },
   company: {
     type: mongoose.Types.ObjectId,
-    ref: "Company",
+    ref: "MasterCompany",
     require: true,
   },
   sizes: [
@@ -22,11 +22,6 @@ const BeerSchema = new Schema({
       price: { type: Number, required: true },
     },
   ],
-  user: {
-    type: mongoose.Types.ObjectId,
-    ref: "User",
-    require: true,
-  },
 });
 
-export const Beer = mongoose.model("Beer", BeerSchema);
+export const MasterLiquor = mongoose.model("MasterBeer", BeerSchema);
