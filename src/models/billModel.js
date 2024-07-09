@@ -18,24 +18,21 @@ const billSchema = new Schema(
           type: String,
           require: true,
         },
-        quantity: {
-          type: Number,
-          require: true,
-        },
+        quantity: {},
       },
     ],
     company: {
       type: mongoose.Types.ObjectId,
       ref: "Company",
     },
-    excise:{
-      type:String,
+    excise: {
+      type: String,
       require: true,
     },
-    pno:{
-      type:String,
+    pno: {
+      type: String,
       require: true,
-    }
+    },
     
   },
   { timestamps: true }
