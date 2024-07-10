@@ -4,7 +4,7 @@ import { Liquor } from "../models/liquorModel.js";
 const getLiquor = async (req, res) => {
   try {
     const { id } = req.params;
-    const liquor = await Liquor.findById(id).populate("liquor");
+    const liquor = await Liquor.findById(id).populate("liquor").populate("company");
     if (!liquor) {
       return res
         .status(404)
