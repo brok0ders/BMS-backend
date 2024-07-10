@@ -89,7 +89,7 @@ export const deleteBeer = async (req, res) => {
 export const getBeerById = async (req, res) => {
   try {
     const { id } = req.params;
-    const beer = await Beer.findById(id);
+    const beer = await Beer.findById(id).populate("beer");
     if (!beer) {
       return res
         .status(404)
@@ -108,7 +108,7 @@ export const getBeerById = async (req, res) => {
 // get all Beer
 export const getAllBeer = async (req, res) => {
   try {
-    const beer = await Beer.find();
+    const beer = await Beer.find().populate("beer");
     if (!beer || beer.length == 0) {
       return res
         .status(404)
