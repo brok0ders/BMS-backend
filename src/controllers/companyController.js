@@ -3,30 +3,30 @@ import { Company } from "../models/companyModel.js";
 //create company
 export const createCompany = async (req, res) => {
   try {
-    const { name, companyType } = req.body;
-    if (!name || !companyType) {
+    const { company } = req.body;
+    if (!company) {
       return res.status(400).json({
         success: false,
         message: "input data is insufficient for creating the company",
       });
     }
     const existingCompany = await Company.findOne({
-      name: name,
+      company
     });
     if (existingCompany) {
       return res
         .status(400)
         .json({ success: false, message: "Company already exist" });
     }
-    const company = await Company.create({
-      name: name,
-      companyType: companyType,
+    let comp = await Company.create({
+      company,
       user: req?.user?._id,
     });
+    comp = await comp.populate("company");
     return res.status(201).json({
       success: true,
       message: "Company created successfully",
-      company,
+      company: comp,
     });
   } catch (e) {
     return res
@@ -70,12 +70,12 @@ export const updateCompany = async (req, res) => {
 export const deleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
     if (!id) {
       return res
         .status(400)
         .json({ success: false, message: "Insufficient data" });
     }
+
     const company = await Company.findByIdAndDelete(id);
     return res.status(200).json({
       success: true,
@@ -95,6 +95,7 @@ export const getCompanyById = async (req, res) => {
     const { id } = req.params;
     const company = await Company.findById(id).populate("company");
     if (!company) {
+      console.log("No comp found!!!");
       return res
         .status(404)
         .json({ success: false, message: "Company not found" });
@@ -102,7 +103,7 @@ export const getCompanyById = async (req, res) => {
     return res
       .status(200)
       .json({ success: true, message: "Company found successfully", company });
-  } catch (e) {
+  } catch (e) { 
     return res
       .status(500)
       .json({ success: false, message: "Failed to get the company" });
