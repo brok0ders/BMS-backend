@@ -243,4 +243,12 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export { getUser, getallUsers, createUser, updateUser, deleteUser, loginUser, deleteEmail };
+export {
+  getUser,
+  getallUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  loginUser,
+  deleteEmail,
+};
