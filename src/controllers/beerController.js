@@ -3,38 +3,44 @@ import { Beer } from "../models/beerModel.js";
 //create Beer
 export const createBeer = async (req, res) => {
   try {
-    const { brandName, stock, price, company } = req.body;
-    if (!brandName || !stock || !price || !company) {
-      return res.status(400).json({
+    const { beerId, stock, company } = req.body;
+    if (!beerId || !stock) {
+      return res.status(404).json({
         success: false,
-        message: "input data is insufficient for creating the Beer",
+        message: "input data is insufficient for creating the Liquor",
       });
     }
-    const existingBeer = await Beer.findOne({ brandName });
+
+    const existingBeer = await Beer.findOne({ beer: beerId });
     if (existingBeer) {
       return res
         .status(400)
-        .json({ success: false, message: "Beer already exist" });
+        .json({ success: false, message: "Beer already exists" });
     }
-    const beer = await Beer.create(req.body);
+    const beer = await Beer.create({
+      beer: beerId,
+      stock,
+      company,
+      user: req?.user?._id,
+    });
     return res.status(201).json({
       success: true,
-      message: "Beer created successfully",
+      message: "new Beer created successfully!",
       beer,
     });
   } catch (e) {
     console.log(e);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to create Beer" });
+      .json({ success: false, message: "Failed to create the Beer" });
   }
 };
 
 export const updateBeer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { brandName, stock, price, company } = req.body;
-    if (!brandName && !stock && !price && !company) {
+    const { stock } = req.body;
+    if (!stock ) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for updating the Beer",

@@ -5,6 +5,17 @@ const BeerSchema = new Schema({
     type: mongoose.Types.ObjectId,
     ref: "MasterBeer",
   },
+  stock: [
+    {
+      size: { type: String, required: true },
+      price: { type: Number, required: true },
+      quantity: { type: Number, required: true },
+    },
+  ],
+  company: {
+    type: mongoose.Types.ObjectId,
+    ref: "Company",
+  },
   user: {
     type: mongoose.Types.ObjectId,
     ref: "User",

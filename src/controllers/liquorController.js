@@ -102,8 +102,8 @@ const createLiquor = async (req, res) => {
 const updateLiquor = async (req, res) => {
   try {
     const { id } = req.params;
-    const { brandName, stock, price, company } = req.body;
-    if (!brandName && !stock && !price && !company) {
+    const { stock } = req.body;
+    if (!stock) {
       return res.status(404).json({
         success: false,
         message:
@@ -117,7 +117,7 @@ const updateLiquor = async (req, res) => {
       { new: true }
     );
 
-    if (!Liquor) {
+    if (!liquor) {
       return res
         .status(404)
         .json({ success: false, message: "no such Liquor found" });
