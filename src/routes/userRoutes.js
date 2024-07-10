@@ -18,7 +18,7 @@ router.route("/login").post(loginUser);
 router.route("/all").get(verifyJWT, authoriseRoles("user"), getallUsers);
 router.route("/details").get(verifyJWT, getUser);
 router.route("/update/").put(verifyJWT, updateUser);
-router.route("/email/delete/").delete(verifyJWT, deleteEmail);
+router.route("/email/delete/").put(verifyJWT, deleteEmail);
 router.route("/delete/").delete(verifyJWT, deleteUser);
 
 export default router;
