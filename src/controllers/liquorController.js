@@ -24,22 +24,18 @@ const getLiquor = async (req, res) => {
 const getLiqcom = async (req, res) => {
   try {
     const { com } = req.params;
-    const liquor = await Liquor.find({ company: com });
+    const liquor = await Liquor.find({ company: com }).populate("liquor");
     if (!liquor) {
-      return res
-        .status(200)
-        .json({
-          success: false,
-          message: "no Liquor found on the given company",
-        });
-    }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Liquor found successfully of the given company",
-        liquor,
+      return res.status(200).json({
+        success: false,
+        message: "no Liquor found on the given company",
       });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Liquor found successfully of the given company",
+      liquor,
+    });
   } catch (e) {
     return res
       .status(500)
