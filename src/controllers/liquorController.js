@@ -4,7 +4,7 @@ import { Liquor } from "../models/liquorModel.js";
 const getLiquor = async (req, res) => {
   try {
     const { id } = req.params;
-    const liquor = await Liquor.findById(id);
+    const liquor = await Liquor.findById(id).populate("liquor");
     if (!liquor) {
       return res
         .status(404)
@@ -43,7 +43,7 @@ const getLiqcom = async (req, res) => {
 // get all Liquors
 const getallLiquors = async (req, res) => {
   try {
-    const liquors = await Liquor.find();
+    const liquors = await Liquor.find().populate("liquor");
     if (!liquors || liquors.length==0) {
       return res
         .status(404)
@@ -62,21 +62,25 @@ const getallLiquors = async (req, res) => {
 // create the new Liquor
 const createLiquor = async (req, res) => {
   try {
-    const { brandName, stock, price, company } = req.body;
-    if (!brandName || !stock || !price || !company) {
+    const { liquorId, stock } = req.body;
+    if (!liquorId || !stock) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Liquor",
       });
     }
 
-    const existingLiquor = await Liquor.findOne({brandName});
+    const existingLiquor = await Liquor.findOne({liquor: liquorId});
     if (existingLiquor) {
       return res
         .status(400)
         .json({ success: false, message: "Liquor already exists" });
     }
-    const liquor = await Liquor.create(req.body);
+    const liquor = await Liquor.create({
+      liquor: liquorId,
+      stock,
+      user: req?.user?._id,
+    });
     return res
       .status(201)
       .json({
