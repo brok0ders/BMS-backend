@@ -40,7 +40,7 @@ export const updateBeer = async (req, res) => {
   try {
     const { id } = req.params;
     const { stock } = req.body;
-    if (!stock ) {
+    if (!stock) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for updating the Beer",
@@ -130,7 +130,7 @@ export const getAllBeer = async (req, res) => {
 export const getBeerByCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
-    const beer = await Beer.find({ company: companyId });
+    const beer = await Beer.find({ company: companyId }).populate("beer");
     if (!beer) {
       return res
         .status(404)

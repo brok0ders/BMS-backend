@@ -18,7 +18,19 @@ const billSchema = new Schema(
           type: String,
           require: true,
         },
-        quantity: {},
+        sizes: [
+          {
+            size: {
+              type: String,
+              require: true,
+            },
+            quantity: { type: Number, require: true },
+            price: {
+              type: Number,
+              require: true,
+            },
+          },
+        ],
       },
     ],
     company: {
@@ -33,12 +45,12 @@ const billSchema = new Schema(
       type: String,
       require: true,
     },
-    
+
     total: {
       type: Number,
       require: true,
       default: 0,
-    }
+    },
   },
   { timestamps: true }
 );
