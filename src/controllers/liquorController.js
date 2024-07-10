@@ -24,15 +24,22 @@ const getLiquor = async (req, res) => {
 const getLiqcom = async (req, res) => {
   try {
     const { com } = req.params;
-    const liquor = await Liquor.find({company: com});
+    const liquor = await Liquor.find({ company: com });
     if (!liquor) {
       return res
         .status(200)
-        .json({ success: false, message: "no Liquor found on the given company"});
+        .json({
+          success: false,
+          message: "no Liquor found on the given company",
+        });
     }
     return res
       .status(200)
-      .json({ success: true, message: "Liquor found successfully of the given company", liquor });
+      .json({
+        success: true,
+        message: "Liquor found successfully of the given company",
+        liquor,
+      });
   } catch (e) {
     return res
       .status(500)
@@ -44,7 +51,7 @@ const getLiqcom = async (req, res) => {
 const getallLiquors = async (req, res) => {
   try {
     const liquors = await Liquor.find().populate("liquor");
-    if (!liquors || liquors.length==0) {
+    if (!liquors || liquors.length == 0) {
       return res
         .status(404)
         .json({ success: false, message: "no Liquors found" });
@@ -62,7 +69,7 @@ const getallLiquors = async (req, res) => {
 // create the new Liquor
 const createLiquor = async (req, res) => {
   try {
-    const { liquorId, stock } = req.body;
+    const { liquorId, stock, company } = req.body;
     if (!liquorId || !stock) {
       return res.status(404).json({
         success: false,
@@ -70,7 +77,7 @@ const createLiquor = async (req, res) => {
       });
     }
 
-    const existingLiquor = await Liquor.findOne({liquor: liquorId});
+    const existingLiquor = await Liquor.findOne({ liquor: liquorId });
     if (existingLiquor) {
       return res
         .status(400)
@@ -78,16 +85,15 @@ const createLiquor = async (req, res) => {
     }
     const liquor = await Liquor.create({
       liquor: liquorId,
+      company,
       stock,
       user: req?.user?._id,
     });
-    return res
-      .status(201)
-      .json({
-        success: true,
-        message: "new Liquor created successfully!",
-        liquor,
-      });
+    return res.status(201).json({
+      success: true,
+      message: "new Liquor created successfully!",
+      liquor,
+    });
   } catch (e) {
     console.log(e);
     return res
@@ -99,12 +105,13 @@ const createLiquor = async (req, res) => {
 // update the Liquor
 const updateLiquor = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const { brandName, stock, price, company } = req.body;
     if (!brandName && !stock && !price && !company) {
       return res.status(404).json({
         success: false,
-        message: "atleast one field is required for updating the Liquor details",
+        message:
+          "atleast one field is required for updating the Liquor details",
       });
     }
 
@@ -134,7 +141,7 @@ const updateLiquor = async (req, res) => {
 // delete the Liquor
 const deleteLiquor = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const existingLiquor = await Liquor.findById(id);
     if (!existingLiquor) {
       return res
@@ -152,4 +159,11 @@ const deleteLiquor = async (req, res) => {
   }
 };
 
-export { getLiquor, getallLiquors, getLiqcom, createLiquor, updateLiquor, deleteLiquor };
+export {
+  getLiquor,
+  getallLiquors,
+  getLiqcom,
+  createLiquor,
+  updateLiquor,
+  deleteLiquor,
+};
