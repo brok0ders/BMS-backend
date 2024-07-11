@@ -1,4 +1,8 @@
 import { Bill } from "../models/billModel.js";
+import { Company } from "../models/companyModel.js";
+import { Customer } from "../models/customerModel.js";
+import { Beer } from "../models/beerModel.js";
+import { Liquor } from "../models/liquorModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -6,7 +10,8 @@ const getBill = async (req, res) => {
     const { id } = req.params;
     const bill = await Bill.findById(id)
       .populate("seller")
-      .populate("customer");
+      .populate("customer")
+      .populate("company");
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
@@ -23,11 +28,13 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
-    const { sellerId } = req.params;
-    const bills = await Bill.find({ seller: sellerId })
+    const bills = await Bill.find({ seller: req?.user?._id })
       .populate("seller")
       .populate("customer")
-      .populate("company");
+      .populate({
+        path: "company",
+        populate: { path: "company" }, // replace `someFieldInCompany` with the actual field you want to populate inside `company`
+      });
     if (!bills || bills.length == 0) {
       return res
         .status(404)
@@ -37,6 +44,7 @@ const getallBills = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Bills found sucessfully", bills });
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
       .json({ success: false, message: "Failed to get all the Bills" });
@@ -133,6 +141,9 @@ const getBillRevenueChart = async (req, res) => {
   try {
     const revenueData = await Bill.aggregate([
       {
+        $match: { seller: req?.user._id },
+      },
+      {
         $group: {
           _id: {
             year: { $year: "$createdAt" },
@@ -165,19 +176,23 @@ const getBillRevenueChart = async (req, res) => {
 
 const getTopSellingBeers = async (req, res) => {
   try {
-    const topSellingBeers = await Sale.aggregate([
+    const topSellingLiquors = await Bill.aggregate([
       {
-        $group: {
-          _id: "$beerName",
-          totalQuantity: { $sum: "$quantity" },
+        $match: {
+          seller: req?.user?._id,
+          billType: "beer",
         },
       },
       {
-        $lookup: {
-          from: "companies",
-          localField: "company",
-          foreignField: "_id",
-          as: "companyDetails",
+        $unwind: "$products",
+      },
+      {
+        $unwind: "$products.sizes",
+      },
+      {
+        $group: {
+          _id: "$products.brand",
+          totalQuantity: { $sum: "$products.sizes.quantity" },
         },
       },
       {
@@ -188,16 +203,88 @@ const getTopSellingBeers = async (req, res) => {
       },
     ]);
 
-    const data = topSellingBeers.map((item) => ({
-      beerName: item._id,
+    const data = topSellingLiquors.map((item) => ({
+      brand: item._id,
       totalQuantity: item.totalQuantity,
     }));
 
     // Return the data
     res.status(200).json({ message: "Data Fetched", data });
   } catch (error) {
-    console.error("Error fetching top selling beers:", error);
+    console.error("Error fetching top selling liquors:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+const getTopSellingLiquors = async (req, res) => {
+  try {
+    const topSellingLiquors = await Bill.aggregate([
+      {
+        $match: {
+          seller: req?.user?._id,
+          billType: "liquor",
+        },
+      },
+      {
+        $unwind: "$products",
+      },
+      {
+        $unwind: "$products.sizes",
+      },
+      {
+        $group: {
+          _id: "$products.brand",
+          totalQuantity: { $sum: "$products.sizes.quantity" },
+        },
+      },
+      {
+        $sort: { totalQuantity: -1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]);
+
+    const data = topSellingLiquors.map((item) => ({
+      brand: item._id,
+      totalQuantity: item.totalQuantity,
+    }));
+
+    // Return the data
+    res.status(200).json({ message: "Data Fetched", data });
+  } catch (error) {
+    console.error("Error fetching top selling liquors:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Get Analytics data
+
+const getAnalyticsData = async () => {
+  try {
+    const bill = await Bill.find({ seller: req?.user?._id });
+    const totalRevenue = bill.reduce((acc, cur) => acc + cur.total, 0);
+    const totalBills = bill.length;
+    const totalCompanies = await Company.find({ user: req?.user?._id });
+    const totalCustomers = await Customer.find({ user: req?.user?._id });
+
+    const totalBeers = await Beer.find({ user: req?.user?._id });
+    const totalLiquors = await Liquor.find({ user: req?.user?._id });
+
+    return res.status(200).json({
+      message: "Analytics data fetched successfully",
+      status: true,
+      data: {
+        totalRevenue,
+        totalBills,
+        totalCompanies,
+        totalCustomers,
+        totalBeers,
+        totalLiquors,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching top selling liquors:", error);
+    res.status(500).json({ error: "Failed to get analytics data" });
   }
 };
 
@@ -208,4 +295,6 @@ export {
   updateBill,
   deleteBill,
   getBillRevenueChart,
+  getTopSellingBeers,
+  getTopSellingLiquors,
 };

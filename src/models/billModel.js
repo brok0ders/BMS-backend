@@ -2,6 +2,12 @@ import mongoose, { Mongoose, Schema } from "mongoose";
 
 const billSchema = new Schema(
   {
+    billType: {
+      type: String,
+      enum: ["beer", "liquor"],
+      default: "liquor",
+      required: true,
+    },
     customer: {
       type: mongoose.Types.ObjectId,
       ref: "Customer",
