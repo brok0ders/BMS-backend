@@ -15,8 +15,12 @@ export const createCustomer = async (req, res) => {
     });
     if (existingCustomer) {
       return res
-        .status(400)
-        .json({ success: false, message: "Customer already exist" });
+        .status(200)
+        .json({
+          success: false,
+          message: "Customer Exists",
+          customer: existingCustomer,
+        });
     }
     const customer = await Customer.create({
       licensee,

@@ -1,4 +1,8 @@
 import { Bill } from "../models/billModel.js";
+import { Company } from "../models/companyModel.js";
+import { Customer } from "../models/customerModel.js";
+import { Beer } from "../models/beerModel.js";
+import { Liquor } from "../models/liquorModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -250,6 +254,37 @@ const getTopSellingLiquors = async (req, res) => {
   } catch (error) {
     console.error("Error fetching top selling liquors:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Get Analytics data
+
+const getAnalyticsData = async () => {
+  try {
+    const bill = await Bill.find({ seller: req?.user?._id });
+    const totalRevenue = bill.reduce((acc, cur) => acc + cur.total, 0);
+    const totalBills = bill.length;
+    const totalCompanies = await Company.find({ user: req?.user?._id });
+    const totalCustomers = await Customer.find({ user: req?.user?._id });
+
+    const totalBeers = await Beer.find({ user: req?.user?._id });
+    const totalLiquors = await Liquor.find({ user: req?.user?._id });
+
+    return res.status(200).json({
+      message: "Analytics data fetched successfully",
+      status: true,
+      data: {
+        totalRevenue,
+        totalBills,
+        totalCompanies,
+        totalCustomers,
+        totalBeers,
+        totalLiquors,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching top selling liquors:", error);
+    res.status(500).json({ error: "Failed to get analytics data" });
   }
 };
 
