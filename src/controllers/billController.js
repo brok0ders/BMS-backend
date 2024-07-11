@@ -23,11 +23,13 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
-    const { sellerId } = req.params;
-    const bills = await Bill.find({ seller: sellerId })
-      .populate("seller")
-      .populate("customer")
-      .populate("company");
+    const bills = await Bill.find({ seller: req?.user })
+    .populate("seller")
+    .populate("customer")
+    .populate({
+      path: "company",
+      populate: { path: "company" }, // replace `someFieldInCompany` with the actual field you want to populate inside `company`
+    });
     if (!bills || bills.length == 0) {
       return res
         .status(404)
@@ -37,6 +39,7 @@ const getallBills = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Bills found sucessfully", bills });
   } catch (e) {
+    console.log(e);
     return res
       .status(500)
       .json({ success: false, message: "Failed to get all the Bills" });
