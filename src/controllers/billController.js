@@ -46,8 +46,8 @@ const getallBills = async (req, res) => {
 // create the new Bill
 const createBill = async (req, res) => {
   try {
-    const { customer, seller, products, company } = req.body;
-    if (!customer || !seller || !products || !company) {
+    const { customer, seller, products, company, total } = req.body;
+    if (!customer || !seller || !products || !company || !total) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
