@@ -6,7 +6,8 @@ const getBill = async (req, res) => {
     const { id } = req.params;
     const bill = await Bill.findById(id)
       .populate("seller")
-      .populate("customer");
+      .populate("customer")
+      .populate("company");
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
