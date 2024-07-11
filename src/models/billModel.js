@@ -45,7 +45,6 @@ const billSchema = new Schema(
       type: String,
       require: true,
     },
-
     total: {
       type: Number,
       require: true,

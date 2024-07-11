@@ -53,16 +53,17 @@ const createBill = async (req, res) => {
         message: "input data is insufficient for creating the Bill",
       });
     }
-    const bill = await Bill.create(req.body)
-      .populate("seller")
-      .populate("customer");
+    let bill = await Bill.create(req.body);
+    // bill = bill.populate("seller").populate("customer");
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",
       bill,
     });
   } catch (e) {
+    console.log(e);
     return res
+
       .status(500)
       .json({ success: false, message: "Failed to create the Bill" });
   }
