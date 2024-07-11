@@ -6,16 +6,20 @@ import {
   getallBills,
   getBill,
   getBillRevenueChart,
+  getTopSellingBeers,
+  getTopSellingLiquors,
   updateBill,
 } from "../controllers/billController.js";
 
 const router = Router();
 
-router.route("/all/:sellerId").get(getallBills);
-router.route("/:id").get(getBill);
+router.route("/all/").get(verifyJWT, getallBills);
+router.route("/:id").get(verifyJWT, getBill);
 router.route("/new").post(verifyJWT, createBill);
 router.route("/edit/:id").put(verifyJWT, updateBill);
 router.route("/delete/:id").delete(verifyJWT, deleteBill);
-router.route("/chart/revenue").get(getBillRevenueChart);
+router.route("/chart/revenue").get(verifyJWT, getBillRevenueChart);
+router.route("/chart/top-beers").get(verifyJWT, getTopSellingBeers);
+router.route("/chart/top-liquors").get(verifyJWT, getTopSellingLiquors);
 
 export default router;
