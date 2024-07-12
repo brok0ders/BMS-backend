@@ -13,8 +13,13 @@ const getBill = async (req, res) => {
       .populate("customer")
       .populate({
         path: "company",
-        populate: { path: "company" },
+        select: "name",
+        populate: {
+          path: "company",
+          select: "name",
+        },
       });
+
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
@@ -36,8 +41,13 @@ const getallBills = async (req, res) => {
       .populate("customer")
       .populate({
         path: "company",
-        populate: { path: "company" },
+        select: "name",
+        populate: {
+          path: "company",
+          select: "name",
+        },
       });
+    console.log(bills);
     if (!bills || bills.length == 0) {
       return res
         .status(404)
