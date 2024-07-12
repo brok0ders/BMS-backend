@@ -11,7 +11,10 @@ const getBill = async (req, res) => {
     const bill = await Bill.findById(id)
       .populate("seller")
       .populate("customer")
-      .populate("company");
+      .populate({
+        path: "company",
+        populate: { path: "company" },
+      });
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
@@ -28,12 +31,12 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
-    const bills = await Bill.find({ seller: req?.user?._id })
+    const bills = await Bill.find()
       .populate("seller")
       .populate("customer")
       .populate({
         path: "company",
-        populate: { path: "company" }, // replace `someFieldInCompany` with the actual field you want to populate inside `company`
+        populate: { path: "company" },
       });
     if (!bills || bills.length == 0) {
       return res
@@ -259,22 +262,23 @@ const getTopSellingLiquors = async (req, res) => {
 
 // Get Analytics data
 
-const getAnalyticsData = async () => {
+const getAnalyticsData = async (req, res) => {
   try {
     const bill = await Bill.find({ seller: req?.user?._id });
     const totalRevenue = bill.reduce((acc, cur) => acc + cur.total, 0);
     const totalBills = bill.length;
-    const totalCompanies = await Company.find({ user: req?.user?._id });
-    const totalCustomers = await Customer.find({ user: req?.user?._id });
-
-    const totalBeers = await Beer.find({ user: req?.user?._id });
-    const totalLiquors = await Liquor.find({ user: req?.user?._id });
+    const totalCompanies = (await Company.find({ user: req?.user?._id }))
+      .length;
+    const customers = await Customer.find({ user: req?.user._id });
+    const totalCustomers = customers.length;
+    const totalBeers = (await Beer.find({ user: req?.user?._id })).length;
+    const totalLiquors = (await Liquor.find({ user: req?.user?._id })).length;
 
     return res.status(200).json({
       message: "Analytics data fetched successfully",
       status: true,
       data: {
-        totalRevenue,
+        totalRevenue: totalRevenue.toFixed(0),
         totalBills,
         totalCompanies,
         totalCustomers,
@@ -297,4 +301,5 @@ export {
   getBillRevenueChart,
   getTopSellingBeers,
   getTopSellingLiquors,
+  getAnalyticsData,
 };
