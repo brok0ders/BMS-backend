@@ -14,8 +14,8 @@ import {
 
 const router = Router();
 
-router.route("/all/").get(getallBills);
-router.route("/:id").get(getBill);
+router.route("/all/").get(verifyJWT, getallBills);
+router.route("/:id").get(verifyJWT, getBill);
 router.route("/new").post(verifyJWT, createBill);
 router.route("/edit/:id").put(verifyJWT, updateBill);
 router.route("/delete/:id").delete(verifyJWT, deleteBill);
