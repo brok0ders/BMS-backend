@@ -3,6 +3,8 @@ import { Company } from "../models/companyModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
+import { MasterBeer } from "../models/master/masterBeerModel.js";
+import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -57,15 +59,95 @@ const getallBills = async (req, res) => {
 // create the new Bill
 const createBill = async (req, res) => {
   try {
-    const { customer, seller, products, company } = req.body;
-    if (!customer || !seller || !products || !company) {
+    const { customer, seller, products, company, total, billType } = req.body;
+    if (!customer || !seller || !products || !company || !total) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
       });
     }
+
+    if (billType === "beer") {
+      for (let i = 0; i < products?.length; i++) {
+        const beerGlobal = await MasterBeer.findOne({
+          brandName: products[i].brand,
+        });
+        if (!beerGlobal) {
+          console.log(`No MasterBeer found for brand ${products[i].brand}`);
+          continue;
+        }
+
+        const beer = await Beer.findOne({ beer: beerGlobal._id });
+        if (!beer) {
+          console.log(`No Beer found for brand ID ${beerGlobal._id}`);
+          continue;
+        }
+
+        const stock = beer.stock.map((item) => {
+          const matchingSize = products[i].sizes.find(
+            (sizeItem) => sizeItem.size === item.size
+          );
+          if (matchingSize) {
+            return {
+              size: item.size,
+              price: item.price,
+              quantity: item.quantity - matchingSize.quantity,
+            };
+          }
+          return item;
+        });
+
+        const updatedBeer = await Beer.findByIdAndUpdate(
+          beer._id,
+          { $set: { stock } },
+          { new: true }
+        );
+
+        console.log(updatedBeer);
+      }
+    }
+
+    if (billType === "liquor") {
+      for (let i = 0; i < products?.length; i++) {
+        const liquorGlobal = await MasterLiquor.findOne({
+          brandName: products[i].brand,
+        });
+        if (!liquorGlobal) {
+          console.log(`No MasterLiquor found for brand ${products[i].brand}`);
+          continue;
+        }
+
+        const liquor = await Liquor.findOne({ liquor: liquorGlobal._id });
+        if (!liquor) {
+          console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
+          continue;
+        }
+
+        const stock = liquor.stock.map((item) => {
+          const matchingSize = products[i].sizes.find(
+            (sizeItem) => sizeItem.size === item.size
+          );
+          if (matchingSize) {
+            return {
+              size: item.size,
+              price: item.price,
+              quantity: item.quantity - matchingSize.quantity,
+            };
+          }
+          return item;
+        });
+
+        const updatedLiquor = await Liquor.findByIdAndUpdate(
+          liquor._id,
+          { $set: { stock } },
+          { new: true }
+        );
+
+        console.log(updatedLiquor);
+      }
+    }
+
     let bill = await Bill.create(req.body);
-    // bill = bill.populate("seller").populate("customer");
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",

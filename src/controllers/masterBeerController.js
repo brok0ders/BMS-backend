@@ -14,6 +14,7 @@ export const getAllMasterBeers =async (req,res)=>{
     }
 }
 
+
 export const insertManyBeers =async(req,res)=>{
     try{
         await MasterBeer.insertMany(req.body);
