@@ -162,7 +162,7 @@ const createBill = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",
-      bill,
+      bill: bill._id,
     });
   } catch (e) {
     console.log(e);
