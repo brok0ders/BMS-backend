@@ -354,22 +354,23 @@ const getTopSellingLiquors = async (req, res) => {
 
 // Get Analytics data
 
-const getAnalyticsData = async () => {
+const getAnalyticsData = async (req, res) => {
   try {
     const bill = await Bill.find({ seller: req?.user?._id });
     const totalRevenue = bill.reduce((acc, cur) => acc + cur.total, 0);
     const totalBills = bill.length;
-    const totalCompanies = await Company.find({ user: req?.user?._id });
-    const totalCustomers = await Customer.find({ user: req?.user?._id });
-
-    const totalBeers = await Beer.find({ user: req?.user?._id });
-    const totalLiquors = await Liquor.find({ user: req?.user?._id });
+    const totalCompanies = (await Company.find({ user: req?.user?._id }))
+      .length;
+    const customers = await Customer.find({ user: req?.user._id });
+    const totalCustomers = customers.length;
+    const totalBeers = (await Beer.find({ user: req?.user?._id })).length;
+    const totalLiquors = (await Liquor.find({ user: req?.user?._id })).length;
 
     return res.status(200).json({
       message: "Analytics data fetched successfully",
       status: true,
       data: {
-        totalRevenue,
+        totalRevenue: totalRevenue.toFixed(0),
         totalBills,
         totalCompanies,
         totalCustomers,
@@ -392,4 +393,5 @@ export {
   getBillRevenueChart,
   getTopSellingBeers,
   getTopSellingLiquors,
+  getAnalyticsData,
 };
