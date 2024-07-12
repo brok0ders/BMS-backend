@@ -13,7 +13,15 @@ const getBill = async (req, res) => {
     const bill = await Bill.findById(id)
       .populate("seller")
       .populate("customer")
-      .populate("company");
+      .populate({
+        path: "company",
+        select: "name",
+        populate: {
+          path: "company",
+          select: "name",
+        },
+      });
+
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
@@ -31,12 +39,17 @@ const getBill = async (req, res) => {
 const getallBills = async (req, res) => {
   try {
     const bills = await Bill.find({ seller: req?.user?._id })
-      .populate("seller")
-      .populate("customer")
-      .populate({
+    .populate("seller")
+    .populate("customer")
+    .populate({
+      path: "company",
+      select: "name",
+      populate: {
         path: "company",
-        populate: { path: "company" }, // replace `someFieldInCompany` with the actual field you want to populate inside `company`
-      });
+        select: "name",
+      },
+    });
+    console.log(bills);
     if (!bills || bills.length == 0) {
       return res
         .status(404)
