@@ -4,19 +4,17 @@ import { User } from "../models/userModel.js";
 export const verifyJWT = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    
+
     const token = authHeader?.split(" ")[1];
     if (!token) {
       return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized request" });
+        .status(401)
+        .json({ success: false, message: "Unauthorized request" });
     }
-    
+
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    console.log(decodedToken);
 
     const user = await User.findById(decodedToken?._id).select("-password");
-    console.log(user);
 
     if (!user) {
       return res
