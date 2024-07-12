@@ -36,6 +36,7 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
+    console.log(req);
     const bills = await Bill.find({ seller: req?.user?._id })
       .populate("seller")
       .populate("customer")
@@ -74,7 +75,87 @@ const createBill = async (req, res) => {
         message: "input data is insufficient for creating the Bill",
       });
     }
-    req.body.seller = req?.user._id;
+
+    if (billType === "beer") {
+      for (let i = 0; i < products?.length; i++) {
+        const beerGlobal = await MasterBeer.findOne({
+          brandName: products[i].brand,
+        });
+        if (!beerGlobal) {
+          console.log(`No MasterBeer found for brand ${products[i].brand}`);
+          continue;
+        }
+
+        const beer = await Beer.findOne({ beer: beerGlobal._id });
+        if (!beer) {
+          console.log(`No Beer found for brand ID ${beerGlobal._id}`);
+          continue;
+        }
+
+        const stock = beer.stock.map((item) => {
+          const matchingSize = products[i].sizes.find(
+            (sizeItem) => sizeItem.size === item.size
+          );
+          if (matchingSize) {
+            return {
+              size: item.size,
+              price: item.price,
+              quantity: item.quantity - matchingSize.quantity,
+            };
+          }
+          return item;
+        });
+
+        const updatedBeer = await Beer.findByIdAndUpdate(
+          beer._id,
+          { $set: { stock } },
+          { new: true }
+        );
+
+        console.log(updatedBeer);
+      }
+    }
+
+    if (billType === "liquor") {
+      for (let i = 0; i < products?.length; i++) {
+        const liquorGlobal = await MasterLiquor.findOne({
+          brandName: products[i].brand,
+        });
+        if (!liquorGlobal) {
+          console.log(`No MasterLiquor found for brand ${products[i].brand}`);
+          continue;
+        }
+
+        const liquor = await Liquor.findOne({ liquor: liquorGlobal._id });
+        if (!liquor) {
+          console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
+          continue;
+        }
+
+        const stock = liquor.stock.map((item) => {
+          const matchingSize = products[i].sizes.find(
+            (sizeItem) => sizeItem.size === item.size
+          );
+          if (matchingSize) {
+            return {
+              size: item.size,
+              price: item.price,
+              quantity: item.quantity - matchingSize.quantity,
+            };
+          }
+          return item;
+        });
+
+        const updatedLiquor = await Liquor.findByIdAndUpdate(
+          liquor._id,
+          { $set: { stock } },
+          { new: true }
+        );
+
+        console.log(updatedLiquor);
+      }
+    }
+
     let bill = await Bill.create(req.body);
     // bill = bill.populate("seller").populate("customer");
     return res.status(201).json({

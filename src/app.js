@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+// import emailRoutes from "./routes/emailRoutes";
 import userRoutes from "./routes/userRoutes.js";
 import billRoutes from "./routes/billRoutes.js";
 import liquorRoutes from "./routes/liquorRoutes.js";
@@ -17,6 +19,14 @@ app.use(
     origin: ["http://localhost:5173", "http://localhost:5174"],
   })
 );
+// //
+// dotenv.config();
+
+// const corsOptions = {
+//   origin: "*",
+//   credentials: true, //access-control-allow-credentials:true
+//   optionSuccessStatus: 200,
+// };
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -28,7 +38,11 @@ app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/beer", beerRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/master-company", masterCompanyRoutes);
-app.use("/api/v1/master-beer",masterBeerRoutes);
-app.use("/api/v1/master-liquor",masterLiquorRoutes);
+app.use("/api/v1/master-beer", masterBeerRoutes);
+app.use("/api/v1/master-liquor", masterLiquorRoutes);
+//Signup and login
+// app.use("/api/v1/email", emailRoutes);
+
+// app.use("api/v1/")
 
 export default app;
