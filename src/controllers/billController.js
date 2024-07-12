@@ -67,19 +67,20 @@ const getallBills = async (req, res) => {
 // create the new Bill
 const createBill = async (req, res) => {
   try {
-    const { customer, seller, products, company } = req.body;
-    if (!customer || !seller || !products || !company) {
+    const { customer, products, company } = req.body;
+    if (!customer || !products || !company) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
       });
     }
+    req.body.seller = req?.user._id;
     let bill = await Bill.create(req.body);
     // bill = bill.populate("seller").populate("customer");
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",
-      bill,
+      bill: bill._id,
     });
   } catch (e) {
     console.log(e);
