@@ -5,7 +5,6 @@ import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
 import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 import { MasterBeer } from "../models/master/masterBeerModel.js";
-import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -72,12 +71,14 @@ const getallBills = async (req, res) => {
 const createBill = async (req, res) => {
   try {
     const { customer, products, company, billType } = req.body;
-    if (!customer || !products || !company) {
+    if (!customer || !products || !company || !billType) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
       });
     }
+
+    req.body.seller = req.user._id;
 
     if (billType === "beer") {
       for (let i = 0; i < products?.length; i++) {
