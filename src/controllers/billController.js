@@ -3,6 +3,8 @@ import { Company } from "../models/companyModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
+import { MasterBeer } from "../models/master/masterBeerModel.js";
+import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -68,7 +70,7 @@ const getallBills = async (req, res) => {
 // create the new Bill
 const createBill = async (req, res) => {
   try {
-    const { customer, products, company } = req.body;
+    const { customer, products, company, billType } = req.body;
     if (!customer || !products || !company) {
       return res.status(404).json({
         success: false,
