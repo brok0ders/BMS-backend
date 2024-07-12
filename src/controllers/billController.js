@@ -3,9 +3,9 @@ import { Company } from "../models/companyModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
-import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 import { MasterBeer } from "../models/master/masterBeerModel.js";
 import { MasterLiquor } from "../models/master/masterLiquorModel.js";
+import { sendMail } from "../utils/sendMail.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -79,6 +79,8 @@ const createBill = async (req, res) => {
       });
     }
 
+    req.body.seller = req?.user._id;
+
     if (billType === "beer") {
       for (let i = 0; i < products?.length; i++) {
         const beerGlobal = await MasterBeer.findOne({
@@ -114,8 +116,6 @@ const createBill = async (req, res) => {
           { $set: { stock } },
           { new: true }
         );
-
-        console.log(updatedBeer);
       }
     }
 
@@ -160,7 +160,14 @@ const createBill = async (req, res) => {
     }
 
     let bill = await Bill.create(req.body);
-    // bill = bill.populate("seller").populate("customer");
+    bill = await bill.populate("seller");
+    await sendMail({
+      emails: bill.seller.email,
+      billNo: bill.billNo,
+      total: bill.total,
+      name: bill.seller.name,
+      url: `http://localhost:5173/dashboard/bill/details/${bill._id}"`,
+    });
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",
