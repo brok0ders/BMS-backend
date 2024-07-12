@@ -3,6 +3,7 @@ import { Company } from "../models/companyModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
+import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 import { MasterBeer } from "../models/master/masterBeerModel.js";
 import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
