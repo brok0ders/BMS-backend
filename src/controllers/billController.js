@@ -56,14 +56,14 @@ const getallBills = async (req, res) => {
 // create the new Bill
 const createBill = async (req, res) => {
   try {
-    const { customer, seller, products, company, total, billType } = req.body;
-    if (!customer || !seller || !products || !company || !total) {
+    const { customer, products, company, total, billType } = req.body;
+    if (!customer || !products || !company || !total) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
       });
     }
-
+    req.body.seller = req?.user._id;
     if (billType === "beer") {
       for (let i = 0; i < products?.length; i++) {
         const beerGlobal = await MasterBeer.findOne({
