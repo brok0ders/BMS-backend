@@ -4,6 +4,7 @@ import {
   createBill,
   deleteBill,
   getallBills,
+  getAnalyticsData,
   getBill,
   getBillRevenueChart,
   getTopSellingBeers,
@@ -21,5 +22,6 @@ router.route("/delete/:id").delete(verifyJWT, deleteBill);
 router.route("/chart/revenue").get(verifyJWT, getBillRevenueChart);
 router.route("/chart/top-beers").get(verifyJWT, getTopSellingBeers);
 router.route("/chart/top-liquors").get(verifyJWT, getTopSellingLiquors);
+router.route("/dashboard/analytics").get(verifyJWT, getAnalyticsData);
 
 export default router;

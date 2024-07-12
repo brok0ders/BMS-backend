@@ -3,8 +3,6 @@ import { Company } from "../models/companyModel.js";
 import { Customer } from "../models/customerModel.js";
 import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
-import { MasterBeer } from "../models/master/masterBeerModel.js";
-import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -13,7 +11,15 @@ const getBill = async (req, res) => {
     const bill = await Bill.findById(id)
       .populate("seller")
       .populate("customer")
-      .populate("company");
+      .populate({
+        path: "company",
+        select: "name",
+        populate: {
+          path: "company",
+          select: "name",
+        },
+      });
+
     if (!bill) {
       return res.status(404).json({ success: false, message: "no Bill found" });
     }
@@ -30,13 +36,19 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
+    console.log(req);
     const bills = await Bill.find({ seller: req?.user?._id })
       .populate("seller")
       .populate("customer")
       .populate({
         path: "company",
-        populate: { path: "company" }, // replace `someFieldInCompany` with the actual field you want to populate inside `company`
+        select: "name",
+        populate: {
+          path: "company",
+          select: "name",
+        },
       });
+    console.log(bills);
     if (!bills || bills.length == 0) {
       return res
         .status(404)
@@ -56,14 +68,14 @@ const getallBills = async (req, res) => {
 // create the new Bill
 const createBill = async (req, res) => {
   try {
-    const { customer, products, company, total, billType } = req.body;
-    if (!customer || !products || !company || !total) {
+    const { customer, products, company } = req.body;
+    if (!customer || !products || !company) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
       });
     }
-    req.body.seller = req?.user._id;
+
     if (billType === "beer") {
       for (let i = 0; i < products?.length; i++) {
         const beerGlobal = await MasterBeer.findOne({
@@ -145,6 +157,7 @@ const createBill = async (req, res) => {
     }
 
     let bill = await Bill.create(req.body);
+    // bill = bill.populate("seller").populate("customer");
     return res.status(201).json({
       success: true,
       message: "new Bill created successfully!",
@@ -341,22 +354,23 @@ const getTopSellingLiquors = async (req, res) => {
 
 // Get Analytics data
 
-const getAnalyticsData = async () => {
+const getAnalyticsData = async (req, res) => {
   try {
     const bill = await Bill.find({ seller: req?.user?._id });
     const totalRevenue = bill.reduce((acc, cur) => acc + cur.total, 0);
     const totalBills = bill.length;
-    const totalCompanies = await Company.find({ user: req?.user?._id });
-    const totalCustomers = await Customer.find({ user: req?.user?._id });
-
-    const totalBeers = await Beer.find({ user: req?.user?._id });
-    const totalLiquors = await Liquor.find({ user: req?.user?._id });
+    const totalCompanies = (await Company.find({ user: req?.user?._id }))
+      .length;
+    const customers = await Customer.find({ user: req?.user._id });
+    const totalCustomers = customers.length;
+    const totalBeers = (await Beer.find({ user: req?.user?._id })).length;
+    const totalLiquors = (await Liquor.find({ user: req?.user?._id })).length;
 
     return res.status(200).json({
       message: "Analytics data fetched successfully",
       status: true,
       data: {
-        totalRevenue,
+        totalRevenue: totalRevenue.toFixed(0),
         totalBills,
         totalCompanies,
         totalCustomers,
@@ -379,4 +393,5 @@ export {
   getBillRevenueChart,
   getTopSellingBeers,
   getTopSellingLiquors,
+  getAnalyticsData,
 };
