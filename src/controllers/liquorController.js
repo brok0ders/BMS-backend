@@ -75,7 +75,7 @@ const createLiquor = async (req, res) => {
       });
     }
 
-    const existingLiquor = await Liquor.findOne({ liquor: liquorId });
+    const existingLiquor = await Liquor.findOne({ liquor: liquorId, user: req?.user?._id });
     if (existingLiquor) {
       return res
         .status(400)

@@ -11,7 +11,7 @@ export const createBeer = async (req, res) => {
       });
     }
 
-    const existingBeer = await Beer.findOne({ beer: beerId });
+    const existingBeer = await Beer.findOne({ beer: beerId, user: req?.user?._id });
     if (existingBeer) {
       return res
         .status(400)

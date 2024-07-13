@@ -11,7 +11,8 @@ export const createCompany = async (req, res) => {
       });
     }
     const existingCompany = await Company.findOne({
-      company
+      company,
+      user: req?.user?._id,
     });
     if (existingCompany) {
       return res
@@ -103,7 +104,7 @@ export const getCompanyById = async (req, res) => {
     return res
       .status(200)
       .json({ success: true, message: "Company found successfully", company });
-  } catch (e) { 
+  } catch (e) {
     return res
       .status(500)
       .json({ success: false, message: "Failed to get the company" });
