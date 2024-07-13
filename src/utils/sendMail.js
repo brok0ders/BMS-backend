@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-export const sendMail = async ({ emails, total, name, billNo, url }) => {
+export const sendMail = async ({ date, emails, total, name, billNo, url }) => {
   try {
     // Configure nodemailer to send email
     const transporter = await nodemailer.createTransport({
@@ -61,13 +61,14 @@ export const sendMail = async ({ emails, total, name, billNo, url }) => {
             color: white;
             text-decoration: none;
             border-radius: 4px;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Bill Created</h1>
+            <h1>New Bill Created</h1>
         </div>
         <div class="content">
             <p>Dear, ${name},</p>
