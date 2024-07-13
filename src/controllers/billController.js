@@ -4,6 +4,8 @@ import { Customer } from "../models/customerModel.js";
 import { Beer } from "../models/beerModel.js";
 import { Liquor } from "../models/liquorModel.js";
 import { MasterBeer } from "../models/master/masterBeerModel.js";
+import { MasterLiquor } from "../models/master/masterLiquorModel.js";
+
 import { sendMail } from "../utils/sendMail.js";
 
 // get the Bill by id
@@ -165,7 +167,7 @@ const createBill = async (req, res) => {
       billNo: bill.billNo,
       total: bill.total,
       name: bill.seller.name,
-      url: `http://localhost:5173/dashboard/bill/details/${bill._id}"`,
+      url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
