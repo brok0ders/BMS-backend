@@ -117,6 +117,28 @@ export const getCustomerById = async (req, res) => {
   }
 };
 
+// get the Customer by liscensee
+export const getCustomerByLicensee = async (req, res) => {
+  try {
+    const { licensee } = req.params;
+    const customer = await Customer.find({licensee: licensee});
+    if (!customer) {
+      return res
+      .status(200)
+      .json({ success: false, message: "No Customer found" });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Customer found successfully",
+      customer,
+    });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get the Customer" });
+  }
+};
+
 // get all Customer
 export const getAllCustomer = async (req, res) => {
   try {

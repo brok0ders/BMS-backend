@@ -90,28 +90,17 @@ billSchema.pre("save", async function (next) {
       .sort({ createdAt: -1 })
       .exec();
 
-    console.log(latestBill);
+    const companyPrefix = bill.company.company.name
+      .substring(0, 2)
+      .toUpperCase();
 
-    if (
-      latestBill &&
-      latestBill.company.company &&
-      latestBill.company.company.name
-    ) {
-      // Extract the first two letters of the company name
-      const companyPrefix = latestBill.company.company.name
-        .substring(0, 2)
-        .toUpperCase();
-
-      if (latestBill.billNo) {
-        // Extract numeric part from billNo
-        const latestBillNo = parseInt(latestBill.billNo.substring(4), 10);
-        const newBillNo = (latestBillNo + 1).toString().padStart(4, "0"); // Ensure 4 digits with leading zeros
-        bill.billNo = `FL${companyPrefix}${newBillNo}`;
-      } else {
-        bill.billNo = `FL${companyPrefix}0001`; // Starting billNo if no previous bill exists
-      }
+    if (latestBill) {
+      // Extract numeric part from billNo
+      const latestBillNo = parseInt(latestBill.billNo.substring(4), 10);
+      const newBillNo = (latestBillNo + 1).toString().padStart(4, "0"); // Ensure 4 digits with leading zeros
+      bill.billNo = `FL${companyPrefix}${newBillNo}`;
     } else {
-      bill.billNo = "FLXX0001"; // Default format if no company name found
+      bill.billNo = `FL${companyPrefix}0001`; // Starting billNo if no previous bill exists
     }
   }
   next();
