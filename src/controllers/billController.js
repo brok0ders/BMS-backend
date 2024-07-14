@@ -161,9 +161,9 @@ const createBill = async (req, res) => {
     }
 
     let bill = await Bill.create(req.body);
-    bill = await bill.populate("seller");
+    bill = await bill.populate("seller").populate("customer");
     await sendMail({
-      emails: bill.seller.email,
+      emails: bill.seller.email.push(customer.email),
       billNo: bill.billNo,
       total: bill.total,
       name: bill.seller.name,
@@ -400,6 +400,125 @@ const getAnalyticsData = async (req, res) => {
   }
 };
 
+const getMonthlyData = async (req, res) => {
+  try {
+    let { month, billType } = req.query;
+    const currentDate = new Date();
+
+    const currentYear = currentDate.getFullYear();
+    let financialYearStart, financialYearEnd;
+
+    if (currentDate.getMonth() + 1 >= 4) {
+      // If current month is April or later
+      financialYearStart = new Date(`${currentYear}-04-01`);
+      financialYearEnd = new Date(`${currentYear + 1}-03-31`);
+    } else {
+      // If current month is before April
+      financialYearStart = new Date(`${currentYear - 1}-04-01`);
+      financialYearEnd = new Date(`${currentYear}-03-31`);
+    }
+
+    let matchCondition = {
+      billType,
+      seller: req?.user._id,
+      createdAt: {
+        $gte: financialYearStart,
+        $lt: financialYearEnd,
+      },
+    };
+
+    if (month != 0) {
+      month = parseInt(month, 10);
+      const startOfMonth = new Date(
+        financialYearStart.getFullYear(),
+        month - 1,
+        1
+      );
+      const endOfMonth = new Date(financialYearStart.getFullYear(), month, 1);
+      matchCondition.createdAt = {
+        $gte: startOfMonth,
+        $lt: endOfMonth,
+      };
+    }
+    const bills = await Bill.find(matchCondition).lean();
+
+    let totalRevenue = 0;
+    let totalPratifal = 0;
+    let totalTcs = 0;
+    let sizeQuantities = {};
+
+    bills.forEach((bill) => {
+      totalRevenue += bill.total || 0;
+      totalPratifal += bill.pratifal || 0;
+      totalTcs += bill.tcs || 0;
+
+      bill.products.forEach((product) => {
+        product.sizes.forEach((size) => {
+          if (!sizeQuantities[size.size]) {
+            sizeQuantities[size.size] = 0;
+          }
+          sizeQuantities[size.size] += size.quantity;
+        });
+      });
+    });
+
+    let responseData;
+
+    if (month == 0) {
+      responseData = {
+        totalRevenue,
+        totalPratifal,
+        totalTcs,
+        sizes: sizeQuantities,
+      };
+    } else {
+      let formattedData = {};
+
+      bills.forEach((bill) => {
+        const billYear = new Date(bill.createdAt).getFullYear();
+        const billMonth = new Date(bill.createdAt).getMonth() + 1;
+
+        if (!formattedData[`${billYear}-${billMonth}`]) {
+          formattedData[`${billYear}-${billMonth}`] = {
+            year: billYear,
+            month: billMonth,
+            totalRevenue: 0,
+            totalPratifal: 0,
+            totalTcs: 0,
+            sizes: {},
+          };
+        }
+
+        formattedData[`${billYear}-${billMonth}`].totalRevenue +=
+          bill.total || 0;
+        formattedData[`${billYear}-${billMonth}`].totalPratifal +=
+          bill.pratifal || 0;
+        formattedData[`${billYear}-${billMonth}`].totalTcs += bill.tcs || 0;
+
+        bill.products.forEach((product) => {
+          product.sizes.forEach((size) => {
+            if (!formattedData[`${billYear}-${billMonth}`].sizes[size.size]) {
+              formattedData[`${billYear}-${billMonth}`].sizes[size.size] = 0;
+            }
+            formattedData[`${billYear}-${billMonth}`].sizes[size.size] +=
+              size.quantity;
+          });
+        });
+      });
+
+      responseData = Object.values(formattedData);
+    }
+
+    return res.status(200).json({
+      message: "Monthly data fetched successfully",
+      data: month == 0 ? responseData : responseData[0],
+    });
+  } catch (error) {
+    console.error("Error fetching monthly data:", error);
+    res.status(500).json({ error: "Failed to get analytics data" });
+  }
+};
+
 export {
   getBill,
   getallBills,
@@ -410,4 +529,5 @@ export {
   getTopSellingBeers,
   getTopSellingLiquors,
   getAnalyticsData,
+  getMonthlyData,
 };

@@ -3,7 +3,7 @@ import { Customer } from "../models/customerModel.js";
 //create Customer
 export const createCustomer = async (req, res) => {
   try {
-    const { licensee, shop, firm, pan } = req.body;
+    const { licensee, shop, firm, pan, email } = req.body;
     if (!licensee || !shop || !firm || !pan) {
       return res.status(400).json({
         success: false,
@@ -14,19 +14,18 @@ export const createCustomer = async (req, res) => {
       licensee: licensee,
     });
     if (existingCustomer) {
-      return res
-        .status(200)
-        .json({
-          success: false,
-          message: "Customer Exists",
-          customer: existingCustomer,
-        });
+      return res.status(200).json({
+        success: false,
+        message: "Customer Exists",
+        customer: existingCustomer,
+      });
     }
     const customer = await Customer.create({
       licensee,
       shop,
       firm,
       pan,
+      email,
       user: req.user,
     });
     return res.status(201).json({
