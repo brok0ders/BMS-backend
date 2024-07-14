@@ -6,23 +6,26 @@ const customerSchema = new Schema(
       type: String,
       required: true,
     },
-    shop:{
+    shop: {
       type: String,
       required: true,
     },
-    firm:{
+    firm: {
       type: String,
       required: true,
     },
-    pan:{
-      type:String,
-      required: true
+    pan: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
     },
     user: {
       type: mongoose.Types.ObjectId,
       ref: "User",
       require: true,
-    }
+    },
   },
   { timestamps: true }
 );

@@ -161,9 +161,9 @@ const createBill = async (req, res) => {
     }
 
     let bill = await Bill.create(req.body);
-    bill = await bill.populate("seller");
+    bill = await bill.populate("seller").populate("customer");
     await sendMail({
-      emails: bill.seller.email,
+      emails: bill.seller.email.push(customer.email),
       billNo: bill.billNo,
       total: bill.total,
       name: bill.seller.name,
