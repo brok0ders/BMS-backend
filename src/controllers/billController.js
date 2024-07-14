@@ -511,7 +511,7 @@ const getMonthlyData = async (req, res) => {
 
     return res.status(200).json({
       message: "Monthly data fetched successfully",
-      data: responseData,
+      data: month == 0 ? responseData : responseData[0],
     });
   } catch (error) {
     console.error("Error fetching monthly data:", error);
