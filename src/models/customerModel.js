@@ -20,6 +20,7 @@ const customerSchema = new Schema(
     },
     email: {
       type: String,
+      default: "",
     },
     user: {
       type: mongoose.Types.ObjectId,
