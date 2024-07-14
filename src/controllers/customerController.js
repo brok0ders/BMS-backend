@@ -26,7 +26,7 @@ export const createCustomer = async (req, res) => {
       firm,
       pan,
       email,
-      user: req.user,
+      user: req.user._id,
     });
     return res.status(201).json({
       success: true,

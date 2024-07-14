@@ -77,7 +77,7 @@ export const sendMail = async ({ date, emails, total, name, billNo, url }) => {
             <ul>
                 <li><strong>Bill Number:</strong> ${billNo}</li>
                 <li><strong>Date:</strong> ${date}</li>
-                <li><strong>Amount:</strong> ${total}</li>
+                <li><strong>Amount:</strong> ${total.toFixed(2)}</li>
             </ul>
             <p>If you did not authorize this transaction, please contact our support team immediately.</p>
             <p>Thank you for using our service.</p>
