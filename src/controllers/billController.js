@@ -160,10 +160,14 @@ const createBill = async (req, res) => {
       }
     }
 
-    let bill = await Bill.create(req.body);
-    bill = await bill.populate("seller").populate("customer");
+    let createdBill = await Bill.create(req.body);
+    const bill = await Bill.findById(createdBill._id)
+      .populate("seller")
+      .populate("customer");
+    const emailData = bill.seller.email;
+    emailData.push(bill.customer.email);
     await sendMail({
-      emails: bill.seller.email.push(customer.email),
+      emails: emailData,
       billNo: bill.billNo,
       total: bill.total,
       name: bill.seller.name,
@@ -182,7 +186,6 @@ const createBill = async (req, res) => {
   } catch (e) {
     console.log(e);
     return res
-
       .status(500)
       .json({ success: false, message: "Failed to create the Bill" });
   }
