@@ -6,7 +6,7 @@ import { Liquor } from "../models/liquorModel.js";
 import { MasterBeer } from "../models/master/masterBeerModel.js";
 import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
-import { sendMail } from "../utils/sendMail.js";
+import { sendCustomerMail, sendMail } from "../utils/sendMail.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -40,7 +40,6 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
-    console.log(req);
     const bills = await Bill.find({ seller: req?.user?._id })
       .populate("seller")
       .populate("customer")
@@ -164,12 +163,23 @@ const createBill = async (req, res) => {
       .populate("seller")
       .populate("customer");
     const emailData = bill.seller.email;
-    emailData.push(bill.customer.email);
     await sendMail({
       emails: emailData,
       billNo: bill.billNo,
       total: bill.total,
       name: bill.seller.name,
+      url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
+      date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
+    });
+    await sendCustomerMail({
+      email: bill.customer.email,
+      billNo: bill.billNo,
+      total: bill.total,
+      name: bill.customer.licensee,
       url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
