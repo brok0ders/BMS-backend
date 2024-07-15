@@ -180,7 +180,7 @@ const createBill = async (req, res) => {
       email: bill.customer.email,
       billNo: bill.billNo,
       total: bill.total,
-      name: bill.customer.name,
+      name: bill.customer.licensee,
       url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",

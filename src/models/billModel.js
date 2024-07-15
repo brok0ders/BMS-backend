@@ -76,7 +76,14 @@ const billSchema = new Schema(
 );
 
 billSchema.pre("save", async function (next) {
-  const bill = this;
+  const bill = await this.populate({
+    path: "company",
+    select: "name",
+    populate: {
+      path: "company",
+      select: "name",
+    },
+  });
   if (bill.isNew) {
     const latestBill = await Bill.findOne({ company: bill.company })
       .populate({
@@ -89,11 +96,10 @@ billSchema.pre("save", async function (next) {
       })
       .sort({ createdAt: -1 })
       .exec();
-
     const companyPrefix = bill.company?.company?.name
       .substring(0, 2)
       .toUpperCase();
-
+    console.log("Prefix: " + companyPrefix);
     if (latestBill) {
       // Extract numeric part from billNo
       const latestBillNo = parseInt(latestBill.billNo.substring(4), 10);
