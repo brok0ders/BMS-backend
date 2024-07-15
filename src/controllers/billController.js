@@ -40,7 +40,6 @@ const getBill = async (req, res) => {
 // get all Bills
 const getallBills = async (req, res) => {
   try {
-    console.log(req);
     const bills = await Bill.find({ seller: req?.user?._id })
       .populate("seller")
       .populate("customer")
