@@ -166,6 +166,7 @@ const createBill = async (req, res) => {
       .populate("customer");
     const emailData = bill.seller.email;
     emailData.push(bill.customer.email);
+    console.log(emailData);
     await sendMail({
       emails: emailData,
       billNo: bill.billNo,
