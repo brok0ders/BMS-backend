@@ -52,7 +52,6 @@ const getallBills = async (req, res) => {
           select: "name",
         },
       });
-    console.log(bills);
     if (!bills || bills.length == 0) {
       return res
         .status(404)
@@ -73,7 +72,7 @@ const getallBills = async (req, res) => {
 const createBill = async (req, res) => {
   try {
     const { customer, products, company, billType } = req.body;
-    if (!customer || !products || !company || !billType ) {
+    if (!customer || !products || !company || !billType) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
@@ -166,7 +165,6 @@ const createBill = async (req, res) => {
       .populate("customer");
     const emailData = bill.seller.email;
     emailData.push(bill.customer.email);
-    console.log(emailData);
     await sendMail({
       emails: emailData,
       billNo: bill.billNo,
