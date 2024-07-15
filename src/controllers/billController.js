@@ -52,7 +52,6 @@ const getallBills = async (req, res) => {
           select: "name",
         },
       });
-    console.log(bills);
     if (!bills || bills.length == 0) {
       return res
         .status(404)

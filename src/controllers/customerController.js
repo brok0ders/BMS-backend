@@ -121,11 +121,14 @@ export const getCustomerById = async (req, res) => {
 export const getCustomerByLicensee = async (req, res) => {
   try {
     const { licensee } = req.params;
-    const customer = await Customer.find({licensee: licensee});
-    if (!customer) {
+    const customer = await Customer.find({
+      licensee: licensee,
+      user: req?.user?._id,
+    });
+    if (!customer || customer.length === 0) {
       return res
-      .status(200)
-      .json({ success: false, message: "No Customer found" });
+        .status(404)
+        .json({ success: false, message: "No Customer found" });
     }
     return res.status(200).json({
       success: true,

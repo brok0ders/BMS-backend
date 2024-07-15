@@ -90,7 +90,7 @@ billSchema.pre("save", async function (next) {
       .sort({ createdAt: -1 })
       .exec();
 
-    const companyPrefix = bill.company.company.name
+    const companyPrefix = bill.company?.company?.name
       .substring(0, 2)
       .toUpperCase();
 
