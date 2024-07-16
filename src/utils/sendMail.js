@@ -72,7 +72,9 @@ export const sendMail = async ({ date, emails, total, name, billNo, url }) => {
         </div>
         <div class="content">
             <p>Dear, ${name},</p>
-            <p>We are pleased to inform you that a new bill of ₹${total} amount has been created from your account.</p>
+            <p>We are pleased to inform you that a new bill of ₹${total.toFixed(
+              2
+            )} amount has been created from your account.</p>
             <p>Here are the details:</p>
             <ul>
                 <li><strong>Bill Number:</strong> ${billNo}</li>

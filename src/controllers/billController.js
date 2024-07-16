@@ -169,6 +169,7 @@ const createBill = async (req, res) => {
       total: bill.total,
       name: bill.seller.name,
       url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
+      // url: `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
@@ -180,6 +181,7 @@ const createBill = async (req, res) => {
       billNo: bill.billNo,
       total: bill.total,
       name: bill.customer.licensee,
+      // url: `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
       url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",

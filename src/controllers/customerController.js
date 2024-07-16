@@ -14,10 +14,15 @@ export const createCustomer = async (req, res) => {
       licensee: licensee,
     });
     if (existingCustomer) {
+      const updatedCustomer = await Customer.findByIdAndUpdate(
+        existingCustomer._id,
+        req.body,
+        { new: true }
+      );
       return res.status(200).json({
         success: false,
         message: "Customer Exists",
-        customer: existingCustomer,
+        customer: updatedCustomer,
       });
     }
     const customer = await Customer.create({
