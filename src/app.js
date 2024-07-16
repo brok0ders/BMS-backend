@@ -16,7 +16,12 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "https://6694f1a87ba0796a32336824--silver-naiad-b83629.netlify.app",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://bottlers.netlify.app"
+    ],
   })
 );
 // //
