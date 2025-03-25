@@ -11,6 +11,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import masterCompanyRoutes from "./routes/masterCompanyRoutes.js";
 import masterBeerRoutes from "./routes/masterBeerRoutes.js";
 import masterLiquorRoutes from "./routes/masterLiquorRoutes.js";
+import clRoutes from "./routes/CLRoutes.js";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/v1/bill", billRoutes);
 app.use("/api/v1/liquor", liquorRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/beer", beerRoutes);
+app.use("/api/v1/CL", clRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/master-company", masterCompanyRoutes);
 app.use("/api/v1/master-beer", masterBeerRoutes);

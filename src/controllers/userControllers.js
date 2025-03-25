@@ -50,6 +50,7 @@ const createUser = async (req, res) => {
       address,
       TINno,
       PANno,
+      gType,
     } = req.body;
     if (
       !name ||
@@ -61,7 +62,8 @@ const createUser = async (req, res) => {
       !FLliscensee ||
       !address ||
       !TINno ||
-      !PANno
+      !PANno ||
+      !gType
     ) {
       return res.status(404).json({
         success: false,
@@ -88,6 +90,7 @@ const createUser = async (req, res) => {
       address,
       TINno,
       PANno,
+      gType,
     });
     const token = await user.generateAccessToken();
 
