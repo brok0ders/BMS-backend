@@ -7,6 +7,7 @@ import {
   getAnalyticsData,
   getBill,
   getBillRevenueChart,
+  getDailyReports,
   getMonthlyData,
   getTopSellingBeers,
   getTopSellingLiquors,
@@ -25,5 +26,6 @@ router.route("/chart/top-beers").get(verifyJWT, getTopSellingBeers);
 router.route("/chart/top-liquors").get(verifyJWT, getTopSellingLiquors);
 router.route("/dashboard/analytics").get(verifyJWT, getAnalyticsData);
 router.route("/analytics/monthly").get(verifyJWT, getMonthlyData);
+router.route("/analytics/daily").get(verifyJWT, getDailyReports);
 
 export default router;
