@@ -12,6 +12,7 @@ export const createCustomer = async (req, res) => {
     }
     const existingCustomer = await Customer.findOne({
       licensee: licensee,
+      user: req?.user?._id,
     });
     if (existingCustomer) {
       const updatedCustomer = await Customer.findByIdAndUpdate(

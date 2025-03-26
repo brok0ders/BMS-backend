@@ -34,6 +34,12 @@ const userSchema = new Schema(
       type: String,
       require: true,
     },
+    gType:{
+      type: String,
+      enum: ["fl","cl"],
+      require: true,
+      default:"fl",
+    },
     FLliscensee: {
       type: String,
       rquire: true,
