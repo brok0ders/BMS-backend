@@ -533,6 +533,51 @@ const getMonthlyData = async (req, res) => {
   }
 };
 
+const getDailyReports = async (req, res) => {
+  try {
+    const { billType } = req.query;
+
+    if (!billType) {
+      return res
+        .status(400)
+        .json({ error: "billType query parameter is required" });
+    }
+
+    const date = new Date();
+    const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+
+    const bills = await Bill.find({
+      billType: billType,
+      createdAt: {
+        $gte: startOfDay,
+        $lt: endOfDay,
+      },
+    });
+
+    const sizeQuantities = {};
+    let totalPrice = 0;
+
+    bills.forEach((bill) => {
+      bill.products.forEach((product) => {
+        product.sizes.forEach((size) => {
+          if (sizeQuantities[size.size]) {
+            sizeQuantities[size.size] += size.quantity;
+          } else {
+            sizeQuantities[size.size] = size.quantity;
+          }
+          totalPrice += size.price;
+        });
+      });
+    });
+
+    res.status(200).json({ data: { sizeQuantities, totalPrice } });
+  } catch (error) {
+    console.error("Error fetching daily data:", error);
+    res.status(500).json({ error: "Failed to get analytics data" });
+  }
+};
+
 export {
   getBill,
   getallBills,
@@ -544,4 +589,5 @@ export {
   getTopSellingLiquors,
   getAnalyticsData,
   getMonthlyData,
+  getDailyReports,
 };
