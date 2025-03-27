@@ -3,7 +3,7 @@ import { CL } from "../models/clModel.js";
 // get the CL by id
 const getCL = async (req, res) => {
   try {
-    const cl = await CL.find({user:req?.user?._id});
+    const cl = await CL.find({ user: req?.user?._id });
     if (cl.length == 0) {
       return res.status(404).json({ success: false, message: "no CL found" });
     }
@@ -67,10 +67,10 @@ const createCL = async (req, res) => {
         quantity: 0,
       },
     ];
-    const brandName = "GULAB SPICED MALTA"
+    const brandName = "GULAB SPICED MALTA";
 
     const cl = await CL.create({
-        brandName,
+      brandName,
       stock,
       user: req?.body?.userId,
     });

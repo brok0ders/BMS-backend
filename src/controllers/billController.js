@@ -7,6 +7,7 @@ import { MasterBeer } from "../models/master/masterBeerModel.js";
 import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 import { sendCustomerMail, sendMail } from "../utils/sendMail.js";
+import { CL } from "../models/clModel.js";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -68,10 +69,144 @@ const getallBills = async (req, res) => {
 };
 
 // create the new Bill
+// const createBill = async (req, res) => {
+//   try {
+//     const { customer, products, company, billType } = req.body;
+//     if (!customer || !products || !company || !billType) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "input data is insufficient for creating the Bill",
+//       });
+//     }
+
+//     req.body.seller = req.user._id;
+
+//     if (billType === "beer") {
+//       for (let i = 0; i < products?.length; i++) {
+//         const beerGlobal = await MasterBeer.findOne({
+//           brandName: products[i].brand,
+//         });
+//         if (!beerGlobal) {
+//           console.log(`No MasterBeer found for brand ${products[i].brand}`);
+//           continue;
+//         }
+
+//         const beer = await Beer.findOne({ beer: beerGlobal._id });
+//         if (!beer) {
+//           console.log(`No Beer found for brand ID ${beerGlobal._id}`);
+//           continue;
+//         }
+
+//         const stock = beer.stock.map((item) => {
+//           const matchingSize = products[i].sizes.find(
+//             (sizeItem) => sizeItem.size === item.size
+//           );
+//           if (matchingSize) {
+//             return {
+//               size: item.size,
+//               price: item.price,
+//               quantity: item.quantity - matchingSize.quantity,
+//             };
+//           }
+//           return item;
+//         });
+
+//         const updatedBeer = await Beer.findByIdAndUpdate(
+//           beer._id,
+//           { $set: { stock } },
+//           { new: true }
+//         );
+//       }
+//     }
+
+//     if (billType === "liquor") {
+//       for (let i = 0; i < products?.length; i++) {
+//         const liquorGlobal = await MasterLiquor.findOne({
+//           brandName: products[i].brand,
+//         });
+//         if (!liquorGlobal) {
+//           console.log(`No MasterLiquor found for brand ${products[i].brand}`);
+//           continue;
+//         }
+
+//         const liquor = await Liquor.findOne({ liquor: liquorGlobal._id });
+//         if (!liquor) {
+//           console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
+//           continue;
+//         }
+
+//         const stock = liquor.stock.map((item) => {
+//           const matchingSize = products[i].sizes.find(
+//             (sizeItem) => sizeItem.size === item.size
+//           );
+//           if (matchingSize) {
+//             return {
+//               size: item.size,
+//               price: item.price,
+//               quantity: item.quantity - matchingSize.quantity,
+//             };
+//           }
+//           return item;
+//         });
+
+//         const updatedLiquor = await Liquor.findByIdAndUpdate(
+//           liquor._id,
+//           { $set: { stock } },
+//           { new: true }
+//         );
+
+//         console.log(updatedLiquor);
+//       }
+//     }
+
+//     let createdBill = await Bill.create(req.body);
+//     const bill = await Bill.findById(createdBill._id)
+//       .populate("seller")
+//       .populate("customer");
+//     const emailData = bill.seller.email;
+//     await sendMail({
+//       emails: emailData,
+//       billNo: bill.billNo,
+//       total: bill.total,
+//       name: bill.seller.name,
+//       url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
+//       // url: `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
+//       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
+//         day: "2-digit",
+//         month: "2-digit",
+//         year: "numeric",
+//       }),
+//     });
+//     await sendCustomerMail({
+//       email: bill.customer.email,
+//       billNo: bill.billNo,
+//       total: bill.total,
+//       name: bill.customer.licensee,
+//       // url: `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
+//       url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
+//       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
+//         day: "2-digit",
+//         month: "2-digit",
+//         year: "numeric",
+//       }),
+//     });
+//     return res.status(201).json({
+//       success: true,
+//       message: "new Bill created successfully!",
+//       bill: bill._id,
+//     });
+//   } catch (e) {
+//     console.log(e);
+//     return res
+//       .status(500)
+//       .json({ success: false, message: "Failed to create the Bill" });
+//   }
+// };
+
 const createBill = async (req, res) => {
   try {
     const { customer, products, company, billType } = req.body;
-    if (!customer || !products || !company || !billType) {
+    if (!customer || !products || !billType) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
@@ -81,6 +216,7 @@ const createBill = async (req, res) => {
     req.body.seller = req.user._id;
 
     if (billType === "beer") {
+      // Existing beer update logic
       for (let i = 0; i < products?.length; i++) {
         const beerGlobal = await MasterBeer.findOne({
           brandName: products[i].brand,
@@ -110,7 +246,7 @@ const createBill = async (req, res) => {
           return item;
         });
 
-        const updatedBeer = await Beer.findByIdAndUpdate(
+        await Beer.findByIdAndUpdate(
           beer._id,
           { $set: { stock } },
           { new: true }
@@ -119,6 +255,7 @@ const createBill = async (req, res) => {
     }
 
     if (billType === "liquor") {
+      // Existing liquor update logic
       for (let i = 0; i < products?.length; i++) {
         const liquorGlobal = await MasterLiquor.findOne({
           brandName: products[i].brand,
@@ -148,13 +285,72 @@ const createBill = async (req, res) => {
           return item;
         });
 
-        const updatedLiquor = await Liquor.findByIdAndUpdate(
+        await Liquor.findByIdAndUpdate(
           liquor._id,
           { $set: { stock } },
           { new: true }
         );
+      }
+    }
 
-        console.log(updatedLiquor);
+    // New block for CL (Gulab Spiced Malta) bill type
+    if (billType === "cl") {
+      try {
+        const cl = await CL.findOne({ user: req.user._id });
+        if (!cl) {
+          console.log(`No CL found for user ${req.user._id}`);
+          return res.status(404).json({ message: "CL not found" });
+        }
+
+        // Create a deep copy of the stock to modify
+        const updatedStock = cl.stock.map((stockItem) => {
+          // Find the first matching product size
+          const matchingProduct = products.find((product) =>
+            product.sizes.some((size) => size.size === stockItem.size)
+          );
+
+          if (matchingProduct) {
+            // Find the specific size entry for this product
+            const matchingSize = matchingProduct.sizes.find(
+              (size) => size.size === stockItem.size
+            );
+
+            if (matchingSize) {
+              return {
+                ...stockItem,
+                quantity: stockItem.quantity - matchingSize.quantity,
+              };
+            }
+          }
+
+          // If no matching size found, return the original stock item
+          return stockItem;
+        });
+
+        // Validate stock doesn't go negative
+        const hasNegativeStock = updatedStock.some((item) => item.quantity < 0);
+        if (hasNegativeStock) {
+          return res.status(400).json({
+            message: "Insufficient stock",
+            currentStock: cl.stock,
+            requestedStock: products,
+          });
+        }
+
+        // Update the entire stock at once
+        const updatedCL = await CL.findByIdAndUpdate(
+          cl._id,
+          { $set: { stock: updatedStock } },
+          { new: true }
+        );
+
+        console.log("Updated CL Stock:", JSON.stringify(updatedCL));
+      } catch (error) {
+        console.error("Error updating CL stock:", error);
+        return res.status(500).json({
+          message: "Error updating stock",
+          error: error.message,
+        });
       }
     }
 
@@ -168,8 +364,10 @@ const createBill = async (req, res) => {
       billNo: bill.billNo,
       total: bill.total,
       name: bill.seller.name,
-      url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
-      // url: `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
+      url:
+        billType === "cl"
+          ? `http://localhost:5173/dashboard/cl/bill/details/${bill._id}`
+          : `http://localhost:5173/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
@@ -181,8 +379,10 @@ const createBill = async (req, res) => {
       billNo: bill.billNo,
       total: bill.total,
       name: bill.customer.licensee,
-      // url: `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
-      url: `http://localhost:5173/dashboard/bill/details/${bill._id}`,
+      url:
+        billType === "cl"
+          ? `http://localhost:5173/dashboard/cl/bill/details/${bill._id}`
+          : `http://localhost:5173/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
