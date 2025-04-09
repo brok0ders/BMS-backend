@@ -293,7 +293,6 @@ const createBill = async (req, res) => {
       }
     }
 
-    // New block for CL (Gulab Spiced Malta) bill type
     if (billType === "cl") {
       try {
         const cl = await CL.findOne({ user: req.user._id });
@@ -302,32 +301,35 @@ const createBill = async (req, res) => {
           return res.status(404).json({ message: "CL not found" });
         }
 
-        // Create a deep copy of the stock to modify
-        const updatedStock = cl.stock.map((stockItem) => {
-          // Find the first matching product size
+        // Create a deep copy of the stock and update the quantity
+        let updatedStock = cl.stock.map((stockItem) => {
+          // Find the matching product by brand name (assuming all belong to one brand)
           const matchingProduct = products.find((product) =>
             product.sizes.some((size) => size.size === stockItem.size)
           );
 
           if (matchingProduct) {
-            // Find the specific size entry for this product
+            // Find the correct size inside the product
             const matchingSize = matchingProduct.sizes.find(
               (size) => size.size === stockItem.size
             );
 
             if (matchingSize) {
+              console.log(
+                `Updating size: ${stockItem.size}, Current Quantity: ${stockItem.quantity}, Deducting: ${matchingSize.quantity}`
+              );
+
               return {
                 ...stockItem,
-                quantity: stockItem.quantity - matchingSize.quantity,
+                quantity: stockItem.quantity - matchingSize.quantity, // Reduce the stock
               };
             }
           }
 
-          // If no matching size found, return the original stock item
-          return stockItem;
+          return stockItem; // Return unchanged if no match found
         });
 
-        // Validate stock doesn't go negative
+        // Validate stock to ensure no negative values
         const hasNegativeStock = updatedStock.some((item) => item.quantity < 0);
         if (hasNegativeStock) {
           return res.status(400).json({
@@ -337,14 +339,11 @@ const createBill = async (req, res) => {
           });
         }
 
-        // Update the entire stock at once
-        const updatedCL = await CL.findByIdAndUpdate(
-          cl._id,
-          { $set: { stock: updatedStock } },
-          { new: true }
-        );
+        // Update the stock in the database
+        cl.stock = updatedStock;
+        await cl.save(); // Ensure the document is actually updated
 
-        console.log("Updated CL Stock:", JSON.stringify(updatedCL));
+        console.log("Stock updated successfully:", cl.stock);
       } catch (error) {
         console.error("Error updating CL stock:", error);
         return res.status(500).json({
