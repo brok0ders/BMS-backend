@@ -183,6 +183,7 @@ const billSchema = new Schema(
       required: true,
       default: 0,
     },
+
     fexcise: {
       type: Number,
       required: true,
