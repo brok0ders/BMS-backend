@@ -737,17 +737,14 @@ const getMonthlyData = async (req, res) => {
     let { fromDate, toDate, billType } = req.query;
     const currentDate = new Date();
 
-    // Set default date range to current financial year if not provided
     if (!fromDate || !toDate) {
       const currentYear = currentDate.getFullYear();
       let financialYearStart, financialYearEnd;
 
       if (currentDate.getMonth() + 1 >= 4) {
-        // If current month is April or later
         financialYearStart = new Date(`${currentYear}-04-01`);
         financialYearEnd = new Date(`${currentYear + 1}-03-31`);
       } else {
-        // If current month is before April
         financialYearStart = new Date(`${currentYear - 1}-04-01`);
         financialYearEnd = new Date(`${currentYear}-03-31`);
       }
@@ -755,11 +752,9 @@ const getMonthlyData = async (req, res) => {
       fromDate = financialYearStart;
       toDate = financialYearEnd;
     } else {
-      // Convert string dates to Date objects
       fromDate = new Date(fromDate);
       toDate = new Date(toDate);
 
-      // Set toDate to end of day
       toDate.setHours(23, 59, 59, 999);
     }
 
@@ -796,7 +791,6 @@ const getMonthlyData = async (req, res) => {
       });
     });
 
-    // Check if we need to group data by month or return aggregate data
     const isAggregateOnly = req.query.aggregate === "true";
 
     let responseData;
