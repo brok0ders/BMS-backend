@@ -405,8 +405,8 @@ const createBill = async (req, res) => {
 const updateBill = async (req, res) => {
   try {
     const { id } = req.params;
-    const { customer, seller, products, company } = req.body;
-    if (!customer && !seller && !products && !company) {
+    const { paid } = req.body;
+    if (!paid) {
       return res.status(404).json({
         success: false,
         message: "atleast one field is required for updating the Bill details",
