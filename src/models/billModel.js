@@ -178,6 +178,16 @@ const billSchema = new Schema(
       required: true,
       default: 0,
     },
+    paid: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    fexcise: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     tcs: {
       type: Number,
       required: true,
