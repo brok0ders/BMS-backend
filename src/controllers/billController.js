@@ -246,11 +246,13 @@ const createBill = async (req, res) => {
           return item;
         });
 
-        await Beer.findByIdAndUpdate(
+        const b = await Beer.findByIdAndUpdate(
           beer._id,
           { $set: { stock } },
           { new: true }
         );
+
+        // console.log("updated beer: ", b);
       }
     }
 
@@ -261,13 +263,13 @@ const createBill = async (req, res) => {
           brandName: products[i].brand,
         });
         if (!liquorGlobal) {
-          console.log(`No MasterLiquor found for brand ${products[i].brand}`);
+          // console.log(`No MasterLiquor found for brand ${products[i].brand}`);
           continue;
         }
 
         const liquor = await Liquor.findOne({ liquor: liquorGlobal._id });
         if (!liquor) {
-          console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
+          // console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
           continue;
         }
 
@@ -285,11 +287,12 @@ const createBill = async (req, res) => {
           return item;
         });
 
-        await Liquor.findByIdAndUpdate(
+        const l = await Liquor.findByIdAndUpdate(
           liquor._id,
           { $set: { stock } },
           { new: true }
         );
+        // console.log("updated liquor: ", l);
       }
     }
 
@@ -297,7 +300,7 @@ const createBill = async (req, res) => {
       try {
         const cl = await CL.findOne({ user: req.user._id });
         if (!cl) {
-          console.log(`No CL found for user ${req.user._id}`);
+          // console.log(`No CL found for user ${req.user._id}`);
           return res.status(404).json({ message: "CL not found" });
         }
 

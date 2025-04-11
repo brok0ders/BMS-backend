@@ -15,6 +15,11 @@ const LiquorSchema = new Schema({
       wep: { type: Number, required: true }, //Women Empowerment Cow Protection Sports Activity Cess
       hologram: { type: Number, required: true }, //Hologram & track and trace fee
       pratifal: { type: Number, required: true }, //pratifal Fee
+      profit: {
+        type: Number,
+        default: 70,
+        require: true,
+      },
     },
   ],
 });

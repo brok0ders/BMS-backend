@@ -51,6 +51,11 @@ export const updateBeer = async (req, res) => {
       { $set: req.body },
       { new: true }
     );
+    if (!updatedBeer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no such Beer found" });
+    }
     return res.status(200).json({
       success: true,
       message: "Beer details updated successfully",
