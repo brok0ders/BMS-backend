@@ -602,7 +602,7 @@ const getAnalyticsData = async (req, res) => {
       message: "Analytics data fetched successfully",
       status: true,
       data: {
-        totalRevenue: Number(totalRevenue.toFixed(0)), // Convert to number after formatting
+        totalRevenue: Number(totalRevenue.toFixed(2)),
         totalBills,
         totalCompanies,
         totalCustomers,
@@ -786,9 +786,9 @@ const getDailyReports = async (req, res) => {
           } else {
             sizeQuantities[size.size] = Number(size.quantity);
           }
-          totalPrice += Number(size.price);
         });
       });
+      totalPrice += Number(bill.total);
     });
 
     res.status(200).json({
