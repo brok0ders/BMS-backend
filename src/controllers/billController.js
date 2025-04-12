@@ -490,7 +490,7 @@ const getBillRevenueChart = async (req, res) => {
         "default",
         { month: "short" }
       ),
-      revenue: item.totalRevenue,
+      revenue: Number(item.totalRevenue), // Ensure revenue is a number
     }));
 
     // Return the data
@@ -532,7 +532,7 @@ const getTopSellingBeers = async (req, res) => {
 
     const data = topSellingLiquors.map((item) => ({
       brand: item._id,
-      totalQuantity: item.totalQuantity,
+      totalQuantity: Number(item.totalQuantity), // Ensure quantity is a number
     }));
 
     // Return the data
@@ -542,6 +542,7 @@ const getTopSellingBeers = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 const getTopSellingLiquors = async (req, res) => {
   try {
     const topSellingLiquors = await Bill.aggregate([
@@ -573,7 +574,7 @@ const getTopSellingLiquors = async (req, res) => {
 
     const data = topSellingLiquors.map((item) => ({
       brand: item._id,
-      totalQuantity: item.totalQuantity,
+      totalQuantity: Number(item.totalQuantity), // Ensure quantity is a number
     }));
 
     // Return the data
@@ -585,11 +586,10 @@ const getTopSellingLiquors = async (req, res) => {
 };
 
 // Get Analytics data
-
 const getAnalyticsData = async (req, res) => {
   try {
     const bill = await Bill.find({ seller: req?.user?._id });
-    const totalRevenue = bill.reduce((acc, cur) => acc + cur.total, 0);
+    const totalRevenue = bill.reduce((acc, cur) => acc + Number(cur.total), 0); // Ensure numbers for addition
     const totalBills = bill.length;
     const totalCompanies = (await Company.find({ user: req?.user?._id }))
       .length;
@@ -602,7 +602,7 @@ const getAnalyticsData = async (req, res) => {
       message: "Analytics data fetched successfully",
       status: true,
       data: {
-        totalRevenue: totalRevenue.toFixed(0),
+        totalRevenue: Number(totalRevenue.toFixed(0)), // Convert to number after formatting
         totalBills,
         totalCompanies,
         totalCustomers,
@@ -615,125 +615,6 @@ const getAnalyticsData = async (req, res) => {
     res.status(500).json({ error: "Failed to get analytics data" });
   }
 };
-
-// const getMonthlyData = async (req, res) => {
-//   try {
-//     let { month, billType } = req.query;
-//     const currentDate = new Date();
-
-//     const currentYear = currentDate.getFullYear();
-//     let financialYearStart, financialYearEnd;
-
-//     if (currentDate.getMonth() + 1 >= 4) {
-//       // If current month is April or later
-//       financialYearStart = new Date(`${currentYear}-04-01`);
-//       financialYearEnd = new Date(`${currentYear + 1}-03-31`);
-//     } else {
-//       // If current month is before April
-//       financialYearStart = new Date(`${currentYear - 1}-04-01`);
-//       financialYearEnd = new Date(`${currentYear}-03-31`);
-//     }
-
-//     let matchCondition = {
-//       billType,
-//       seller: req?.user._id,
-//       createdAt: {
-//         $gte: financialYearStart,
-//         $lt: financialYearEnd,
-//       },
-//     };
-
-//     if (month != 0) {
-//       month = parseInt(month, 10);
-//       const startOfMonth = new Date(
-//         financialYearStart.getFullYear(),
-//         month - 1,
-//         1
-//       );
-//       const endOfMonth = new Date(financialYearStart.getFullYear(), month, 1);
-//       matchCondition.createdAt = {
-//         $gte: startOfMonth,
-//         $lt: endOfMonth,
-//       };
-//     }
-//     const bills = await Bill.find(matchCondition).lean();
-
-//     let totalRevenue = 0;
-//     let totalPratifal = 0;
-//     let totalTcs = 0;
-//     let sizeQuantities = {};
-
-//     bills.forEach((bill) => {
-//       totalRevenue += bill.total || 0;
-//       totalPratifal += bill.pratifal || 0;
-//       totalTcs += bill.tcs || 0;
-
-//       bill.products.forEach((product) => {
-//         product.sizes.forEach((size) => {
-//           if (!sizeQuantities[size.size]) {
-//             sizeQuantities[size.size] = 0;
-//           }
-//           sizeQuantities[size.size] += size.quantity;
-//         });
-//       });
-//     });
-
-//     let responseData;
-
-//     if (month == 0) {
-//       responseData = {
-//         totalRevenue,
-//         totalPratifal,
-//         totalTcs,
-//         sizes: sizeQuantities,
-//       };
-//     } else {
-//       let formattedData = {};
-
-//       bills.forEach((bill) => {
-//         const billYear = new Date(bill.createdAt).getFullYear();
-//         const billMonth = new Date(bill.createdAt).getMonth() + 1;
-
-//         if (!formattedData[`${billYear}-${billMonth}`]) {
-//           formattedData[`${billYear}-${billMonth}`] = {
-//             year: billYear,
-//             month: billMonth,
-//             totalRevenue: 0,
-//             totalPratifal: 0,
-//             totalTcs: 0,
-//             sizes: {},
-//           };
-//         }
-
-//         formattedData[`${billYear}-${billMonth}`].totalRevenue +=
-//           bill.total || 0;
-//         formattedData[`${billYear}-${billMonth}`].totalPratifal +=
-//           bill.pratifal || 0;
-//         formattedData[`${billYear}-${billMonth}`].totalTcs += bill.tcs || 0;
-
-//         bill.products.forEach((product) => {
-//           product.sizes.forEach((size) => {
-//             if (!formattedData[`${billYear}-${billMonth}`].sizes[size.size]) {
-//               formattedData[`${billYear}-${billMonth}`].sizes[size.size] = 0;
-//             }
-//             formattedData[`${billYear}-${billMonth}`].sizes[size.size] +=
-//               size.quantity;
-//           });
-//         });
-//       });
-
-//       responseData = Object.values(formattedData);
-//     }
-
-//     return res.status(200).json({
-//       message: "Monthly data fetched successfully",
-//       data: month == 0 ? responseData : responseData[0],
-//     });
-//   } catch (error) {
-//     console.error("Error fetching monthly data:", error);
-//     res.status(500).json({ error: "Failed to get analytics data" });
-//   }
-// };
 
 const getMonthlyData = async (req, res) => {
   try {
@@ -763,7 +644,7 @@ const getMonthlyData = async (req, res) => {
 
     let matchCondition = {
       billType,
-      seller: req?.user._id,
+      seller: req.user?._id,
       createdAt: {
         $gte: fromDate,
         $lte: toDate,
@@ -779,17 +660,17 @@ const getMonthlyData = async (req, res) => {
     let sizeQuantities = {};
 
     bills.forEach((bill) => {
-      totalRevenue += bill.total || 0;
-      totalPratifal += bill.pratifal || 0;
-      totalExcise += bill.fexcise || 0;
-      totalTcs += bill.tcs || 0;
+      totalRevenue += Number(bill.total) || 0;
+      totalPratifal += Number(bill.pratifal) || 0;
+      totalExcise += Number(bill.fexcise) || 0;
+      totalTcs += Number(bill.tcs) || 0;
 
       bill.products.forEach((product) => {
         product.sizes.forEach((size) => {
           if (!sizeQuantities[size.size]) {
             sizeQuantities[size.size] = 0;
           }
-          sizeQuantities[size.size] += size.quantity;
+          sizeQuantities[size.size] += Number(size.quantity);
         });
       });
     });
@@ -830,17 +711,17 @@ const getMonthlyData = async (req, res) => {
           };
         }
 
-        formattedData[monthKey].totalRevenue += bill.total || 0;
-        formattedData[monthKey].totalPratifal += bill.pratifal || 0;
-        formattedData[monthKey].totalTcs += bill.tcs || 0;
-        formattedData[monthKey].totalExcise += bill.fexcise || 0;
+        formattedData[monthKey].totalRevenue += Number(bill.total) || 0;
+        formattedData[monthKey].totalPratifal += Number(bill.pratifal) || 0;
+        formattedData[monthKey].totalTcs += Number(bill.tcs) || 0;
+        formattedData[monthKey].totalExcise += Number(bill.fexcise) || 0;
 
         bill.products.forEach((product) => {
           product.sizes.forEach((size) => {
             if (!formattedData[monthKey].sizes[size.size]) {
               formattedData[monthKey].sizes[size.size] = 0;
             }
-            formattedData[monthKey].sizes[size.size] += size.quantity;
+            formattedData[monthKey].sizes[size.size] += Number(size.quantity);
           });
         });
       });
@@ -887,6 +768,7 @@ const getDailyReports = async (req, res) => {
 
     const bills = await Bill.find({
       billType: billType,
+      seller: req.user?._id,
       createdAt: {
         $gte: startOfDay,
         $lt: endOfDay,
@@ -900,16 +782,21 @@ const getDailyReports = async (req, res) => {
       bill.products.forEach((product) => {
         product.sizes.forEach((size) => {
           if (sizeQuantities[size.size]) {
-            sizeQuantities[size.size] += size.quantity;
+            sizeQuantities[size.size] += Number(size.quantity);
           } else {
-            sizeQuantities[size.size] = size.quantity;
+            sizeQuantities[size.size] = Number(size.quantity);
           }
-          totalPrice += size.price;
+          totalPrice += Number(size.price);
         });
       });
     });
 
-    res.status(200).json({ data: { sizeQuantities, totalPrice } });
+    res.status(200).json({
+      data: {
+        sizeQuantities,
+        totalPrice: Number(totalPrice),
+      },
+    });
   } catch (error) {
     console.error("Error fetching daily data:", error);
     res.status(500).json({ error: "Failed to get analytics data" });
