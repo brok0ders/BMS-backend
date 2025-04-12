@@ -39,7 +39,29 @@ export const getBeerByBrand = async (req, res) => {
     if (beers.length == 0) {
       return res.status(404).json({
         success: false,
-        message: "No beers found for the given brand",
+        message: "No beer found for the given brand",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Beers fetched successfully",
+      data: beers,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get the Beer." });
+  }
+};
+
+export const getBeersByCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const beers = await MasterBeer.find({ company: companyId });
+    if (beers.length == 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No beers found for the given company",
       });
     }
     return res.status(200).json({

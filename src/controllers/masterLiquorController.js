@@ -40,12 +40,35 @@ export const getLiquorByBrand = async (req, res) => {
     if (liquors.length == 0) {
       return res.status(404).json({
         success: false,
-        message: "No liquors found for the given brand",
+        message: "No liquor found for the given brand",
       });
     }
     return res.status(200).json({
       success: true,
       message: "Liquer fetched successfully",
+      data: liquors,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get the Liquor." });
+  }
+};
+
+export const getLiquorByCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+  
+    const liquors = await MasterLiquor.find({ company: companyId });
+    if (liquors.length == 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No liquors found for the given company",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Liquors fetched successfully",
       data: liquors,
     });
   } catch (error) {
