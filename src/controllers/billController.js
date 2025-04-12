@@ -357,6 +357,10 @@ const createBill = async (req, res) => {
     }
 
     let createdBill = await Bill.create(req.body);
+    if (req.body.createdAt) {
+      createdBill.createdAt = new Date(req.body.createdAt);
+      await createdBill.save();
+    }
     const bill = await Bill.findById(createdBill._id)
       .populate("seller")
       .populate("customer");
@@ -376,6 +380,7 @@ const createBill = async (req, res) => {
         year: "numeric",
       }),
     });
+
     await sendCustomerMail({
       email: bill.customer.email,
       billNo: bill.billNo,
