@@ -3,7 +3,10 @@ export const sendMail = async ({ date, emails, total, name, billNo, url }) => {
   try {
     // Configure nodemailer to send email
     const transporter = await nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
       service: "gmail",
+      secure: true,
       auth: {
         user: process.env.SMTP_MAIL,
         pass: process.env.SMTP_PASSWORD,
@@ -11,7 +14,7 @@ export const sendMail = async ({ date, emails, total, name, billNo, url }) => {
     });
 
     const mailOptions = {
-      from: process.env.SMTP_MAIL,
+      from: `"Bottlers" <${process.env.SMTP_MAIL}>`,
       to: emails.join(","),
       subject: "New Bill Created",
       html: `
@@ -99,13 +102,8 @@ export const sendMail = async ({ date, emails, total, name, billNo, url }) => {
     };
 
     // Send mail with defined transport object
-    await transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
-      }
-    });
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: " + info.response);
   } catch (error) {
     console.log(error);
   }
