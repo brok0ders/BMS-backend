@@ -26,7 +26,9 @@ const getLiquor = async (req, res) => {
 const getLiqcom = async (req, res) => {
   try {
     const { com } = req.params;
+    console.log("com id: "+com);
     const liquor = await Liquor.find({ company: com }).populate("liquor");
+    console.log("liquors: ", liquor);
     if (!liquor) {
       return res.status(200).json({
         success: false,
