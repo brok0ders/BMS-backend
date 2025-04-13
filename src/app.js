@@ -22,6 +22,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://bottlers.netlify.app",
+      "https://bottlers.brokoders.com",
     ],
   })
 );
