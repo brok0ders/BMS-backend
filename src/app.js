@@ -23,17 +23,10 @@ app.use(
       "http://localhost:5174",
       "https://bottlers.netlify.app",
       "https://bottlers.brokoders.com",
+      "https://brokoders.com",
     ],
   })
 );
-// //
-// dotenv.config();
-
-// const corsOptions = {
-//   origin: "*",
-//   credentials: true, //access-control-allow-credentials:true
-//   optionSuccessStatus: 200,
-// };
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
