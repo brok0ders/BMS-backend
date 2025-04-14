@@ -23,6 +23,7 @@ export const createBeer = async (req, res) => {
       company,
       user: req?.user?._id,
     });
+    
     return res.status(201).json({
       success: true,
       message: "new Beer created successfully!",

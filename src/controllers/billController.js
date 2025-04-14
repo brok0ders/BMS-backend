@@ -226,7 +226,7 @@ const createBill = async (req, res) => {
           continue;
         }
 
-        const beer = await Beer.findOne({ beer: beerGlobal._id });
+        const beer = await Beer.findOne({ beer: beerGlobal._id, user: req?.user?._id });
         if (!beer) {
           console.log(`No Beer found for brand ID ${beerGlobal._id}`);
           continue;
@@ -252,7 +252,6 @@ const createBill = async (req, res) => {
           { new: true }
         );
 
-        // console.log("updated beer: ", b);
       }
     }
 
@@ -267,7 +266,7 @@ const createBill = async (req, res) => {
           continue;
         }
 
-        const liquor = await Liquor.findOne({ liquor: liquorGlobal._id });
+        const liquor = await Liquor.findOne({ liquor: liquorGlobal._id, user: req?.user?._id });
         if (!liquor) {
           // console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
           continue;
@@ -346,7 +345,7 @@ const createBill = async (req, res) => {
         cl.stock = updatedStock;
         await cl.save(); // Ensure the document is actually updated
 
-        console.log("Stock updated successfully:", cl.stock);
+        // console.log("Stock updated successfully:", cl.stock);
       } catch (error) {
         console.error("Error updating CL stock:", error);
         return res.status(500).json({
