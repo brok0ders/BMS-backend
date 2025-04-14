@@ -136,9 +136,8 @@ export const getAllBeer = async (req, res) => {
 export const getBeerByCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
-    console.log("beer comp id: ", companyId);
     const beer = await Beer.find({ company: companyId }).populate("beer");
-    console.log("beer: ", beer);
+
     if (!beer) {
       return res
         .status(404)
