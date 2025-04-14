@@ -241,6 +241,7 @@ const createBill = async (req, res) => {
               size: item.size,
               price: item.price,
               quantity: item.quantity - matchingSize.quantity,
+              leak: item.leak,
             };
           }
           return item;
@@ -281,6 +282,7 @@ const createBill = async (req, res) => {
               size: item.size,
               price: item.price,
               quantity: item.quantity - matchingSize.quantity,
+              leak: item.leak,
             };
           }
           return item;
