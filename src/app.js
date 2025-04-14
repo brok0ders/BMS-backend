@@ -18,21 +18,15 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://6694f1a87ba0796a32336824--silver-naiad-b83629.netlify.app",
+      "https://bottlers.brokoders.com/",
       "http://localhost:5173",
       "http://localhost:5174",
       "https://bottlers.netlify.app",
+      "https://bottlers.brokoders.com",
+      "https://brokoders.com",
     ],
   })
 );
-// //
-// dotenv.config();
-
-// const corsOptions = {
-//   origin: "*",
-//   credentials: true, //access-control-allow-credentials:true
-//   optionSuccessStatus: 200,
-// };
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
