@@ -151,15 +151,17 @@ export const getCustomerByLicensee = async (req, res) => {
 // get all Customer
 export const getAllCustomer = async (req, res) => {
   try {
-    const customer = await Customer.find();
+    const customer = await Customer.find({
+      user: req?.user?._id,
+    });
     if (!customer || customer.length == 0) {
       return res
         .status(404)
-        .json({ success: false, message: "no Customer data found" });
+        .json({ success: false, message: "you have no customers!" });
     }
     return res.status(200).json({
       success: true,
-      message: "Customer data fetched successfully",
+      message: "Your Customer data fetched successfully",
       customer,
     });
   } catch (e) {

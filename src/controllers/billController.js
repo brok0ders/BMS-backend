@@ -8,6 +8,7 @@ import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 import { sendCustomerMail, sendMail } from "../utils/sendMail.js";
 import { CL } from "../models/clModel.js";
+import mongoose from "mongoose";
 
 // get the Bill by id
 const getBill = async (req, res) => {
@@ -226,7 +227,10 @@ const createBill = async (req, res) => {
           continue;
         }
 
-        const beer = await Beer.findOne({ beer: beerGlobal._id, user: req?.user?._id });
+        const beer = await Beer.findOne({
+          beer: beerGlobal._id,
+          user: req?.user?._id,
+        });
         if (!beer) {
           console.log(`No Beer found for brand ID ${beerGlobal._id}`);
           continue;
@@ -252,7 +256,6 @@ const createBill = async (req, res) => {
           { $set: { stock } },
           { new: true }
         );
-
       }
     }
 
@@ -267,7 +270,10 @@ const createBill = async (req, res) => {
           continue;
         }
 
-        const liquor = await Liquor.findOne({ liquor: liquorGlobal._id, user: req?.user?._id });
+        const liquor = await Liquor.findOne({
+          liquor: liquorGlobal._id,
+          user: req?.user?._id,
+        });
         if (!liquor) {
           // console.log(`No Liquor found for brand ID ${liquorGlobal._id}`);
           continue;
@@ -809,6 +815,107 @@ const getDailyReports = async (req, res) => {
   }
 };
 
+// getting bill with respect to the customer
+const getBillsByCustomer = async (req, res) => {
+  try {
+    const { id, month } = req.query;
+    const sellerId = req?.user?._id;
+
+    if (!id || !month) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Customer ID and month are required",
+        });
+    }
+
+    const [year, monthStr] = month.split("-"); // expecting format YYYY-MM
+    const inputMonth = parseInt(monthStr) - 1; // JS Date months are 0-based
+    const inputYear = parseInt(year);
+
+    const startDate = new Date(inputYear, inputMonth, 1);
+    const now = new Date();
+
+    // If future month, return empty array
+    if (startDate > now) {
+      return res.status(200).json({
+        success: true,
+        message: "No data for future months",
+        stats: [],
+      });
+    }
+
+    // Set end date depending on whether it's current month or past month
+    let endDate;
+    if (
+      startDate.getMonth() === now.getMonth() &&
+      startDate.getFullYear() === now.getFullYear()
+    ) {
+      // Current month: use today's date
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); // +1 to make it exclusive
+    } else {
+      // Past month: end of the month
+      endDate = new Date(inputYear, inputMonth + 1, 1); // first day of next month
+    }
+
+    const dailyStats = await Bill.aggregate([
+      {
+        $match: {
+          seller: sellerId,
+          customer: new mongoose.Types.ObjectId(id),
+          createdAt: { $gte: startDate, $lt: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            day: { $dayOfMonth: "$createdAt" },
+            month: { $month: "$createdAt" },
+            year: { $year: "$createdAt" },
+          },
+          total: { $sum: "$total" },
+          fexcise: { $sum: "$fexcise" },
+          tcs: { $sum: "$tcs" },
+          pratifal: { $sum: "$pratifal" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: {
+            $dateFromParts: {
+              year: "$_id.year",
+              month: "$_id.month",
+              day: "$_id.day",
+            },
+          },
+          total: 1,
+          fexcise: 1,
+          tcs: 1,
+          pratifal: 1,
+        },
+      },
+      {
+        $sort: { date: 1 },
+      },
+    ]);
+
+    // console.log("daily stats: ", dailyStats);
+
+    return res.status(200).json({
+      success: true,
+      message: "Aggregated daily stats for the customer",
+      stats: dailyStats,
+    });
+  } catch (e) {
+    console.error(e);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
 export {
   getBill,
   getallBills,
@@ -821,4 +928,5 @@ export {
   getAnalyticsData,
   getMonthlyData,
   getDailyReports,
+  getBillsByCustomer,
 };
