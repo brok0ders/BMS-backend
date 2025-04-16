@@ -5,7 +5,7 @@ import {
   deleteCustomer,
   getAllCustomer,
   getCustomerById,
-  getCustomerByLicensee,
+  getCustomerByShop,
   updateCustomer,
 } from "../controllers/customerController.js";
 
@@ -13,7 +13,7 @@ const router = Router();
 
 router.route("/all").get(verifyJWT, getAllCustomer);
 router.route("/:id").get(verifyJWT, getCustomerById);
-router.route("/details/:licensee").get(verifyJWT, getCustomerByLicensee);
+router.route("/details/:shop").get(verifyJWT, getCustomerByShop);
 router.route("/create").post(verifyJWT, createCustomer);
 router.route("/update/:id").put(verifyJWT, updateCustomer);
 router.route("/delete").delete(verifyJWT, deleteCustomer);

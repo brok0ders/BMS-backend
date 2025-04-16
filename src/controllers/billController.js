@@ -379,8 +379,8 @@ const createBill = async (req, res) => {
       name: bill.seller.name,
       url:
         billType === "cl"
-          ? `https://bottlers.netlify.app/dashboard/cl/bill/details/${bill._id}`
-          : `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
+          ? `https://bottlers.brokoders.com/dashboard/cl/bill/details/${bill._id}`
+          : `https://bottlers.brokoders.com/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
@@ -395,8 +395,8 @@ const createBill = async (req, res) => {
       name: bill.customer.licensee,
       url:
         billType === "cl"
-          ? `https://bottlers.netlify.app/dashboard/cl/bill/details/${bill._id}`
-          : `https://bottlers.netlify.app/dashboard/bill/details/${bill._id}`,
+          ? `https://bottlers.brokoders.com/dashboard/cl/bill/details/${bill._id}`
+          : `https://bottlers.brokoders.com/dashboard/bill/details/${bill._id}`,
       date: new Date(bill?.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
@@ -822,12 +822,10 @@ const getBillsByCustomer = async (req, res) => {
     const sellerId = req?.user?._id;
 
     if (!id || !month) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Customer ID and month are required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Customer ID and month are required",
+      });
     }
 
     const [year, monthStr] = month.split("-"); // expecting format YYYY-MM
@@ -837,7 +835,6 @@ const getBillsByCustomer = async (req, res) => {
     const startDate = new Date(inputYear, inputMonth, 1);
     const now = new Date();
 
-    // If future month, return empty array
     if (startDate > now) {
       return res.status(200).json({
         success: true,
@@ -846,24 +843,21 @@ const getBillsByCustomer = async (req, res) => {
       });
     }
 
-    // Set end date depending on whether it's current month or past month
     let endDate;
     if (
       startDate.getMonth() === now.getMonth() &&
       startDate.getFullYear() === now.getFullYear()
     ) {
-      // Current month: use today's date
-      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); // +1 to make it exclusive
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     } else {
-      // Past month: end of the month
-      endDate = new Date(inputYear, inputMonth + 1, 1); // first day of next month
+      endDate = new Date(inputYear, inputMonth + 1, 1);
     }
 
     const dailyStats = await Bill.aggregate([
       {
         $match: {
           seller: sellerId,
-          customer: new mongoose.Types.ObjectId(id),
+          customer: new mongoose.Types.ObjectId(String(id)),
           createdAt: { $gte: startDate, $lt: endDate },
         },
       },
@@ -878,6 +872,7 @@ const getBillsByCustomer = async (req, res) => {
           fexcise: { $sum: "$fexcise" },
           tcs: { $sum: "$tcs" },
           pratifal: { $sum: "$pratifal" },
+          billCount: { $sum: 1 }, // <-- Count number of documents (bills)
         },
       },
       {
@@ -894,14 +889,13 @@ const getBillsByCustomer = async (req, res) => {
           fexcise: 1,
           tcs: 1,
           pratifal: 1,
+          billCount: 1, // <-- Include in final output
         },
       },
       {
         $sort: { date: 1 },
       },
     ]);
-
-    // console.log("daily stats: ", dailyStats);
 
     return res.status(200).json({
       success: true,
@@ -913,6 +907,39 @@ const getBillsByCustomer = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
+  }
+};
+
+const getBillsByDate = async (req, res) => {
+  try {
+    const startDate = new Date("2025-04-16T00:00:00.000Z");
+    const endDate = new Date("2025-04-17T00:00:00.000Z");
+
+    const results = await Bill.find({
+      updatedAt: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    });
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No bills found for the specified date",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Bills fetched successfully",
+      data: results,
+    });
+  } catch (error) {
+    console.error("Error fetching bills:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -929,4 +956,5 @@ export {
   getMonthlyData,
   getDailyReports,
   getBillsByCustomer,
+  getBillsByDate,
 };

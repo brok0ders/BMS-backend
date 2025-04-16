@@ -8,6 +8,7 @@ import {
   getBill,
   getBillRevenueChart,
   getBillsByCustomer,
+  getBillsByDate,
   getDailyReports,
   getMonthlyData,
   getTopSellingBeers,
@@ -18,6 +19,7 @@ import {
 const router = Router();
 
 router.route("/all/").get(verifyJWT, getallBills);
+router.route("/date/").get(getBillsByDate);
 router.route("/:id").get(verifyJWT, getBill);
 router.route("/new").post(verifyJWT, createBill);
 router.route("/update/:id").put(verifyJWT, updateBill);
