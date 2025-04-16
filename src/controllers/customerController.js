@@ -11,7 +11,7 @@ export const createCustomer = async (req, res) => {
       });
     }
     const existingCustomer = await Customer.findOne({
-      licensee: licensee,
+      pan: pan,
       user: req?.user?._id,
     });
     if (existingCustomer) {
@@ -70,7 +70,7 @@ export const updateCustomer = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Customer details updated successfully",
-      customer: updateCustomer,
+      customer: updatedCustomer,
     });
   } catch (e) {
     return res
@@ -149,24 +149,61 @@ export const getCustomerByLicensee = async (req, res) => {
 };
 
 // get all Customer
+// export const getAllCustomer = async (req, res) => {
+//   try {
+//     const customer = await Customer.find({
+//       user: req?.user?._id,
+//     });
+//     if (!customer || customer.length == 0) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "you have no customers!" });
+//     }
+//     return res.status(200).json({
+//       success: true,
+//       message: "Your Customer data fetched successfully",
+//       customer,
+//     });
+//   } catch (e) {
+//     return res
+//       .status(500)
+//       .json({ success: false, message: "Failed to fetch Customer data" });
+//   }
+// };
+
 export const getAllCustomer = async (req, res) => {
   try {
-    const customer = await Customer.find({
-      user: req?.user?._id,
-    });
-    if (!customer || customer.length == 0) {
+    const userId = req?.user?._id;
+
+    const customers = await Customer.aggregate([
+      { $match: { user: userId } },
+      {
+        $group: {
+          _id: "$pan", // group by PAN
+          doc: { $first: "$$ROOT" }, // take the first full customer document for each unique PAN
+        },
+      },
+      {
+        $replaceRoot: { newRoot: "$doc" }, // flatten the grouped doc
+      },
+    ]);
+
+    if (!customers || customers.length === 0) {
       return res
         .status(404)
-        .json({ success: false, message: "you have no customers!" });
+        .json({ success: false, message: "You have no customers!" });
     }
+
     return res.status(200).json({
       success: true,
-      message: "Your Customer data fetched successfully",
-      customer,
+      message: "Unique customers fetched successfully",
+      customer: customers,
     });
   } catch (e) {
+    console.error(e);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to fetch Customer data" });
+      .json({ success: false, message: "Failed to fetch customer data" });
   }
 };
+
