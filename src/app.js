@@ -18,11 +18,11 @@ const app = express();
 app.use(
   cors({
     origin: [
+      "https://bottlers.brokoders.com",
       "https://bottlers.brokoders.com/",
       "http://localhost:5173",
       "http://localhost:5174",
       "https://bottlers.netlify.app",
-      "https://bottlers.brokoders.com",
       "https://brokoders.com",
     ],
   })
