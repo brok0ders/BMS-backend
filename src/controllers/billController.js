@@ -42,10 +42,6 @@ const getallBills = async (req, res) => {
       .populate({
         path: "company",
         select: "name",
-        populate: {
-          path: "company",
-          select: "name",
-        },
       });
     if (!bills || bills.length == 0) {
       return res
