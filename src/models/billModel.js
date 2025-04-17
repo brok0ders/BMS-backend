@@ -226,16 +226,33 @@ billSchema.pre("save", async function (next) {
         select: "name",
       });
 
-      const latestBill2 = await Bill.findOne({
+      const bills = await Bill.find({
         seller: bill?.seller,
-        billType: { $ne: "cl" }, // Exclude CL type bills
-      })
-        .populate({
-          path: "company",
-          select: "name",
-        })
-        .sort({ createdAt: -1 })
-        .exec();
+        billType: { $ne: "cl" },
+        billNo: { $regex: `^FL` }, // Optional: narrow the search
+      }).populate({
+        path: "company",
+        select: "name",
+      });
+
+      const sortedBills = bills
+        .filter((b) => b.billNo?.includes("/"))
+        .sort((a, b) => {
+          const aParts = a.billNo.split("/");
+          const bParts = b.billNo.split("/");
+
+          // Extract the last part safely
+          const aLast = parseInt(aParts[aParts.length - 1], 10) || 0;
+          const bLast = parseInt(bParts[bParts.length - 1], 10) || 0;
+
+          return bLast - aLast; // Sort descending by last number
+        });
+
+      // console.log("sorted bills: ", sortedBills);
+
+      const latestBill2 = sortedBills[0]; // Now this is the latest by number
+
+      // console.log("latest bill: ", latestBill2);
 
       const latestBill = await Bill.findOne({
         company: bill?.company,
@@ -252,9 +269,10 @@ billSchema.pre("save", async function (next) {
       const companyPrefix = bill?.company?.name.substring(0, 2).toUpperCase();
       console.log("Prefix: " + companyPrefix);
 
-      const latestBillNo2 = parseInt(latestBill2?.billNo?.substring(9), 10) || 0;
+      const latestBillNo2 =
+        parseInt(latestBill2?.billNo?.substring(9), 10) || 0;
       const newBillNo2 = (latestBillNo2 + 1).toString().padStart(5, "0");
-      
+
       if (latestBill) {
         // Extract numeric part from billNo
         const latestBillNo = parseInt(latestBill.billNo.substring(4, 8), 10);
