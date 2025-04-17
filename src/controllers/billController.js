@@ -138,8 +138,8 @@ const createBill = async (req, res) => {
       }
     }
 
-    // const url = "https://bottlers.brokoders.com";
-    const url = "http://localhost:5173/";
+    const url = "https://bottlers.brokoders.com";
+    // const url = "http://localhost:5173/";
 
 
     let createdBill = await Bill.create(req.body);
