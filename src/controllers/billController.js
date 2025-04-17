@@ -8,6 +8,39 @@ import { sendCustomerMail, sendMail } from "../utils/sendMail.js";
 import { CL } from "../models/clModel.js";
 import mongoose from "mongoose";
 
+// get reset billNo
+const resetBillNo = async (req, res) => {
+  try {
+    // latest bill
+    const latestBill = await Bill.findOne({
+      user: req?.user?._id,
+      billType: { $ne: "cl" }, // Exclude CL type bills
+    })
+      .populate({
+        path: "company",
+        select: "name",
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const latestBillNo = parseInt(latestBill.billNo?.substring(9), 10) || 0;
+    const newBillNo = (latestBillNo + 1).toString().padStart(5, "0");
+
+    const bills = await Bill.find({
+      user: req?.user?._id,
+      billType: { $ne: "cl" },
+    });
+
+    for (let bill of bills) {
+      let billNo = bill?.billNo;
+      if (billNo.length != 14) {
+        await Bill.findByIdAndDelete(bill?._id, {billNo : `${billNo}/${newBillNo}`});
+        newBillNo += 1;
+      }
+    }
+  } catch (error) {}
+};
+
 // get the Bill by id
 const getBill = async (req, res) => {
   try {
@@ -63,12 +96,23 @@ const getallBills = async (req, res) => {
 
 const createBill = async (req, res) => {
   try {
-    const { customer, products, billType } = req.body;
-   
+    const { customer, products, billType, excise, pno } = req.body;
+
     if (!customer || !products || !billType) {
       return res.status(404).json({
         success: false,
         message: "input data is insufficient for creating the Bill",
+      });
+    }
+
+    const isExist = await Bill.findOne({
+      $or: [{ excise: excise }, { pno: pno }],
+    });
+
+    if (isExist) {
+      return res.status(404).json({
+        success: false,
+        message: "Bill already created with this excise or pno",
       });
     }
 
@@ -137,7 +181,6 @@ const createBill = async (req, res) => {
     const url = "https://bottlers.brokoders.com";
     // const url = "http://localhost:5173/";
 
-
     let createdBill = await Bill.create(req.body);
     if (req.body.createdAt) {
       createdBill.createdAt = new Date(req.body.createdAt);
@@ -164,8 +207,6 @@ const createBill = async (req, res) => {
         year: "numeric",
       }),
     });
-
-
 
     await sendCustomerMail({
       email: bill.customer.email,
@@ -382,12 +423,8 @@ const getAnalyticsData = async (req, res) => {
     const bill = await Bill.find({ seller: req?.user?._id });
     const totalRevenue = bill.reduce((acc, cur) => acc + Number(cur.total), 0); // Ensure numbers for addition
     const totalBills = bill.length;
-    const totalCompanies = (await Company.find({ user: req?.user?._id }))
-      .length;
     const customers = await Customer.find({ user: req?.user._id });
     const totalCustomers = customers.length;
-    const totalBeers = (await Beer.find({ user: req?.user?._id })).length;
-    const totalLiquors = (await Liquor.find({ user: req?.user?._id })).length;
 
     return res.status(200).json({
       message: "Analytics data fetched successfully",
@@ -395,10 +432,7 @@ const getAnalyticsData = async (req, res) => {
       data: {
         totalRevenue: Number(totalRevenue.toFixed(2)),
         totalBills,
-        totalCompanies,
         totalCustomers,
-        totalBeers,
-        totalLiquors,
       },
     });
   } catch (error) {

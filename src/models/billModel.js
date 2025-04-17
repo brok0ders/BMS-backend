@@ -226,8 +226,20 @@ billSchema.pre("save", async function (next) {
         select: "name",
       });
 
+      const latestBill2 = await Bill.findOne({
+        user: bill?.seller,
+        billType: { $ne: "cl" }, // Exclude CL type bills
+      })
+        .populate({
+          path: "company",
+          select: "name",
+        })
+        .sort({ createdAt: -1 })
+        .exec();
+
       const latestBill = await Bill.findOne({
-        company: bill.company,
+        company: bill?.company,
+        user: bill?.seller,
         billType: { $ne: "cl" }, // Exclude CL type bills
       })
         .populate({
@@ -242,11 +254,15 @@ billSchema.pre("save", async function (next) {
 
       if (latestBill) {
         // Extract numeric part from billNo
-        const latestBillNo = parseInt(latestBill.billNo.substring(4), 10);
+        const latestBillNo = parseInt(latestBill.billNo.substring(4, 8), 10);
         const newBillNo = (latestBillNo + 1).toString().padStart(4, "0");
-        this.billNo = `FL${companyPrefix}${newBillNo}`;
+
+        const latestBillNo2 = parseInt(latestBill2.billNo?.substring(9), 10) || 0;
+        const newBillNo2 = (latestBillNo2 + 1).toString().padStart(5, "0");
+        
+        this.billNo = `FL${companyPrefix}${newBillNo}/${newBillNo2}`;
       } else {
-        this.billNo = `FL${companyPrefix}0001`; // Starting billNo if no previous bill exists
+        this.billNo = `FL${companyPrefix}0001/00001`; // Starting billNo if no previous bill exists
       }
     }
   }

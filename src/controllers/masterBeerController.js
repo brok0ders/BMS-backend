@@ -1,5 +1,26 @@
 import { MasterBeer } from "../models/master/masterBeerModel.js";
 
+
+
+export const rmEX0 = async (req, res) => {
+  try {
+    const beers = await MasterBeer.find({excise: 0});
+    if (beers.length == 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No beers found" });
+    }
+    for (let beer in beers) {
+      await MasterBeer.findByIdAndDelete(beer?._id);
+    }
+    return;
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch beer data" });
+  }
+};
+
 export const getAllMasterBeers = async (req, res) => {
   try {
     const beers = await MasterBeer.find();
