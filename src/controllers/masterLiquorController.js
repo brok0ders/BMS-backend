@@ -1,22 +1,40 @@
 import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
-
 export const rmEX0 = async (req, res) => {
   try {
-    const beers = await MasterLiquor.find({excise: 0});
-    if (beers.length == 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No liquor found" });
+    const liquors = await MasterLiquor.find();
+
+    let deletedLiquors = 0;
+    let updatedLiquors = 0;
+
+    // console.log("no of liquors: ", liquors.length);
+
+    for (const liquor of liquors) {
+      const exciseZeroSizes = liquor.sizes.filter((size) => size.excise === 0);
+
+      // console.log("liquor size : "+liquor.sizes.length + ", excise = 0: ", exciseZeroSizes.length);
+      
+      if (exciseZeroSizes.length === liquor.sizes.length) {
+        // All sizes have excise = 0 → delete entire liquor
+        await MasterLiquor.findByIdAndDelete(liquor._id);
+        deletedLiquors++;
+      } else if (exciseZeroSizes.length > 0) {
+        // Remove only excise=0 sizes and save
+        liquor.sizes = liquor.sizes.filter((size) => size.excise !== 0);
+        await liquor.save();
+        updatedLiquors++;
+      }
     }
-    for (let beer in beers) {
-      await MasterLiquor.findByIdAndDelete(beer?._id);
-    }
-    return;
+
+    return res.status(200).json({
+      success: true,
+      message: `Liquor cleanup complete. Deleted: ${deletedLiquors}, Updated: ${updatedLiquors}`,
+    });
   } catch (e) {
+    console.error("Liquor rmEX0 Error:", e);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to fetch liquor data" });
+      .json({ success: false, message: "Failed to clean liquor data" });
   }
 };
 
@@ -78,7 +96,7 @@ export const getLiquorByBrand = async (req, res) => {
 export const getLiquorByCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
-  
+
     const liquors = await MasterLiquor.find({ company: companyId });
     if (liquors.length == 0) {
       return res.status(404).json({

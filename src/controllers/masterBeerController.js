@@ -1,23 +1,39 @@
 import { MasterBeer } from "../models/master/masterBeerModel.js";
 
-
-
 export const rmEX0 = async (req, res) => {
   try {
-    const beers = await MasterBeer.find({excise: 0});
-    if (beers.length == 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No beers found" });
+    const beers = await MasterBeer.find();
+
+    let deletedBeers = 0;
+    let updatedBeers = 0;
+
+    for (const beer of beers) {
+      const exciseZeroSizes = beer.sizes.filter((size) => size.excise === 0);
+
+      if (exciseZeroSizes.length === beer.sizes.length) {
+        // All sizes have excise = 0 → delete the whole beer
+        await MasterBeer.findByIdAndDelete(beer._id);
+        deletedBeers++;
+      } else if (exciseZeroSizes.length > 0) {
+        // Remove only sizes with excise = 0
+        beer.sizes = beer.sizes.filter((size) => size.excise !== 0);
+        await beer.save();
+        updatedBeers++;
+      }
     }
-    for (let beer in beers) {
-      await MasterBeer.findByIdAndDelete(beer?._id);
-    }
-    return;
+
+    return res.status(200).json({
+      success: true,
+      message: `Removed excise=0 sizes. Deleted beers: ${deletedBeers}, Updated beers: ${updatedBeers}`,
+    });
   } catch (e) {
+    console.error("Error in rmEX0:", e);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to fetch beer data" });
+      .json({
+        success: false,
+        message: "Failed to update or delete beer data",
+      });
   }
 };
 

@@ -34,7 +34,9 @@ const resetBillNo = async (req, res) => {
     for (let bill of bills) {
       let billNo = bill?.billNo;
       if (billNo.length != 14) {
-        await Bill.findByIdAndDelete(bill?._id, {billNo : `${billNo}/${newBillNo}`});
+        await Bill.findByIdAndDelete(bill?._id, {
+          billNo: `${billNo}/${newBillNo}`,
+        });
         newBillNo += 1;
       }
     }
@@ -298,9 +300,13 @@ const deleteBill = async (req, res) => {
 
 const getBillRevenueChart = async (req, res) => {
   try {
+    if (!req?.user?._id) {
+      return res.status(401).json({ error: "Unauthorized: User not found" });
+    }
+
     const revenueData = await Bill.aggregate([
       {
-        $match: { seller: req?.user._id },
+        $match: { seller: req.user._id },
       },
       {
         $group: {
@@ -316,16 +322,14 @@ const getBillRevenueChart = async (req, res) => {
       },
     ]);
 
-    // Map the aggregated data to the required format
     const data = revenueData.map((item) => ({
       month: new Date(item._id.year, item._id.month - 1, 1).toLocaleString(
         "default",
         { month: "short" }
       ),
-      revenue: Number(item.totalRevenue), // Ensure revenue is a number
+      revenue: Number(item.totalRevenue),
     }));
 
-    // Return the data
     res.status(200).json({ message: "Data fetched", data });
   } catch (error) {
     console.error("Error fetching bill revenue chart:", error);
