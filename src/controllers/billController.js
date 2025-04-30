@@ -7,6 +7,8 @@ import { Liquor } from "../models/liquorModel.js";
 import { sendCustomerMail, sendMail } from "../utils/sendMail.js";
 import { CL } from "../models/clModel.js";
 import mongoose from "mongoose";
+import { MasterBeer } from "../models/master/masterBeerModel.js";
+import { MasterLiquor } from "../models/master/masterLiquorModel.js";
 
 // get reset billNo
 const resetBillNo = async (req, res) => {
@@ -425,8 +427,31 @@ const getTopSellingLiquors = async (req, res) => {
 const getAnalyticsData = async (req, res) => {
   try {
     const bill = await Bill.find({ seller: req?.user?._id });
-    const totalRevenue = bill.reduce((acc, cur) => acc + Number(cur.total), 0); // Ensure numbers for addition
+    const totalRevenue = bill.reduce((acc, cur) => acc + Number(cur.total), 0);
+    const totalTCS = bill.reduce((acc, cur) => acc + Number(cur.tcs || 0), 0);
+    const totalPratifal = bill.reduce(
+      (acc, cur) => acc + Number(cur.pratifal || 0),
+      0
+    );
+
+    // Calculate total quantity across all sizes in all products
+    const totalQuantity = bill.reduce((acc, cur) => {
+      return (
+        acc +
+        cur.products.reduce((pAcc, product) => {
+          return (
+            pAcc +
+            product.sizes.reduce(
+              (sAcc, size) => sAcc + Number(size.quantity || 0),
+              0
+            )
+          );
+        }, 0)
+      );
+    }, 0);
+
     const totalBills = bill.length;
+
     const customers = await Customer.find({ user: req?.user._id });
     const totalCustomers = customers.length;
 
@@ -435,12 +460,15 @@ const getAnalyticsData = async (req, res) => {
       status: true,
       data: {
         totalRevenue: Number(totalRevenue.toFixed(2)),
+        totalTCS: Number(totalTCS.toFixed(2)),
+        totalPratifal: Number(totalPratifal.toFixed(2)),
+        totalQuantity,
         totalBills,
         totalCustomers,
       },
     });
   } catch (error) {
-    console.error("Error fetching top selling liquors:", error);
+    console.error("Error fetching analytics data:", error);
     res.status(500).json({ error: "Failed to get analytics data" });
   }
 };
@@ -760,6 +788,178 @@ const getBillsByDate = async (req, res) => {
   }
 };
 
+const getCompanyBySeller = async (req, res) => {
+  try {
+    const { month, billType } = req.query;
+    const sellerId = req?.user?._id;
+
+    if (!month) {
+      return res.status(400).json({
+        success: false,
+        message: "Month is required in YYYY-MM format",
+      });
+    }
+
+    const [year, monthStr] = month.split("-"); // expecting format YYYY-MM
+    const inputMonth = parseInt(monthStr) - 1; // JS Date months are 0-based
+    const inputYear = parseInt(year);
+
+    const startDate = new Date(inputYear, inputMonth, 1);
+    const now = new Date();
+
+    if (startDate > now) {
+      return res.status(200).json({
+        success: true,
+        message: "No data for future months",
+        stats: [],
+      });
+    }
+
+    let endDate;
+    if (
+      startDate.getMonth() === now.getMonth() &&
+      startDate.getFullYear() === now.getFullYear()
+    ) {
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    } else {
+      endDate = new Date(inputYear, inputMonth + 1, 1);
+    }
+
+    const Bills = await Bill.find({
+      billType: billType,
+      seller: sellerId,
+      createdAt: { $gte: startDate, $lt: endDate },
+    }).populate("company");
+
+    // Unique all companies
+    const uniqueCompanies = [];
+    const seen = new Set();
+
+    for (const bill of Bills) {
+      const company = bill.company;
+      if (company && !seen.has(company._id.toString())) {
+        seen.add(company._id.toString());
+        uniqueCompanies.push(company);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Companies fetched successfully",
+      company: uniqueCompanies,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const getCompanyBrandsDetails = async (req, res) => {
+  try {
+    const { company, month, billType } = req.query;
+    const seller = req?.user?._id;
+
+    if (!company || !month || !billType || !seller) {
+      return res.status(400).json({
+        success: false,
+        message: "company, month, billType, and seller are required",
+      });
+    }
+
+    const [year, monthStr] = month.split("-");
+    const inputMonth = parseInt(monthStr) - 1;
+    const inputYear = parseInt(year);
+    const startDate = new Date(inputYear, inputMonth, 1);
+    const endDate = new Date(inputYear, inputMonth + 1, 1);
+
+    // Fetch Bills
+    const bills = await Bill.find({
+      seller: seller,
+      billType: billType,
+      company: company,
+      createdAt: { $gte: startDate, $lt: endDate },
+    });
+
+    // Aggregate brand and size quantities
+    const brandMap = new Map();
+
+    bills.forEach((bill) => {
+      bill.products.forEach((product) => {
+        const brand = product.brand;
+
+        if (!brandMap.has(brand)) {
+          brandMap.set(brand, new Map());
+        }
+
+        product.sizes.forEach((sizeEntry) => {
+          const sizeMap = brandMap.get(brand);
+          const size = sizeEntry.size;
+          const qty = sizeEntry.quantity;
+
+          if (sizeMap.has(size)) {
+            sizeMap.set(size, sizeMap.get(size) + qty);
+          } else {
+            sizeMap.set(size, qty);
+          }
+        });
+      });
+    });
+
+    // Fetch from master collection
+    const Model = billType === "beer" ? MasterBeer : MasterLiquor;
+
+    const masterBrands = await Model.find({
+      brandName: { $in: Array.from(brandMap.keys()) },
+      company: company,
+    });
+
+    // Prepare response
+    const result = [];
+
+    masterBrands.forEach((brandDoc) => {
+      const brand = brandDoc.brandName;
+      const sizesInBills = brandMap.get(brand);
+
+      if (!sizesInBills) return;
+
+      const filteredSizes = brandDoc.sizes
+        .filter((s) => sizesInBills.has(s.size))
+        .map((s) => ({
+          size: s.size,
+          quantity: sizesInBills.get(s.size),
+          price: s.price,
+          wep: s.wep,
+          hologram: s.hologram,
+          pratifal: s.pratifal,
+          excise: s.excise,
+          profit: s.profit,
+        }));
+
+      if (filteredSizes.length > 0) {
+        result.push({
+          brandName: brand,
+          sizes: filteredSizes,
+        });
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "All brands found!",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error in getCompanyBrandsDetails:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 export {
   getBill,
   getallBills,
@@ -774,4 +974,6 @@ export {
   getDailyReports,
   getBillsByCustomer,
   getBillsByDate,
+  getCompanyBySeller,
+  getCompanyBrandsDetails,
 };

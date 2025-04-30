@@ -9,6 +9,8 @@ import {
   getBillRevenueChart,
   getBillsByCustomer,
   getBillsByDate,
+  getCompanyBrandsDetails,
+  getCompanyBySeller,
   getDailyReports,
   getMonthlyData,
   getTopSellingBeers,
@@ -31,5 +33,7 @@ router.route("/dashboard/analytics").get(verifyJWT, getAnalyticsData);
 router.route("/analytics/monthly").get(verifyJWT, getMonthlyData);
 router.route("/analytics/daily").get(verifyJWT, getDailyReports);
 router.route("/analytics/customer").get(verifyJWT, getBillsByCustomer);
+router.route("/analytics/seller").get(verifyJWT, getCompanyBySeller);
+router.route("/analytics/brands").get(verifyJWT, getCompanyBrandsDetails);
 
 export default router;
